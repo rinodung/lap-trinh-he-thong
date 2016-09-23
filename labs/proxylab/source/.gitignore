@@ -1,0 +1,12 @@
+*.o
+*.lib
+*.a
+*.dll
+*.so
+*.so.*
+*.dylib
+*.exe
+*.out
+*.app
+proxy
+*.DS_Store

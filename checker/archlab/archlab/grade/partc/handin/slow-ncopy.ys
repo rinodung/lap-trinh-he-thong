@@ -1,0 +1,84 @@
+# #################################################################
+# ncopy.ys - Copy a src block of len words to dst.
+# Return the number of positive ints (>0) contained in src.
+#
+# This code unrolls the main loop by a factor of 4.
+# It gets about half credit for Part C
+#
+# #################################################################
+
+# Do not modify this portion
+# Function prologue
+# %rdi = src, %rsi = dst, %rdx = len
+ncopy:
+
+# #################################################################
+# You can modify this portion
+
+	irmovq $1, %r8          # Constant 1
+	xorq %rax,%rax          # count = 0
+	iaddq $-4, %rdx         # lmu = len - 4
+	jl SkipLoop             # If < 0, skip loop
+
+# Main loop.  Copy 4 elements per iteration
+Loop:
+# 	Code block for offset 0
+	mrmovq 0(%rdi), %r10    # read val from src+0
+	rrmovq %rax, %r11       # Copy count
+	addq %r8, %r11          # count+1
+	andq %r10, %r10         # Test val
+	cmovg %r11, %rax        # If val > 0, count = count+1
+	rmmovq %r10, 0(%rsi)    # Store val at dst+0
+# 	Code block for offset 1
+	mrmovq 8(%rdi), %r10    # read val from src+1
+	rrmovq %rax, %r11       # Copy count
+	addq %r8, %r11          # count+1
+	andq %r10, %r10         # Test val
+	cmovg %r11, %rax        # If val > 0, count = count+1
+	rmmovq %r10, 8(%rsi)    # Store val at dst+1
+# 	Code block for offset 2
+	mrmovq 16(%rdi), %r10   # read val from src+2
+	rrmovq %rax, %r11       # Copy count
+	addq %r8, %r11          # count+1
+	andq %r10, %r10         # Test val
+	cmovg %r11, %rax        # If val > 0, count = count+1
+	rmmovq %r10, 16(%rsi)   # Store val at dst+2
+# 	Code block for offset 3
+	mrmovq 24(%rdi), %r10   # read val from src+3
+	rrmovq %rax, %r11       # Copy count
+	addq %r8, %r11          # count+1
+	andq %r10, %r10         # Test val
+	cmovg %r11, %rax        # If val > 0, count = count+1
+	rmmovq %r10, 24(%rsi)   # Store val at dst+3
+	iaddq $32, %rdi         # src+=4
+	iaddq $32, %rsi         # dst+=4
+	iaddq $-4, %rdx         # lmu-=4
+	jge Loop                # if lmu >= 0, goto Loop
+SkipLoop:
+# Set %rdx to number or remaining elements
+# (between 0 and 3)
+	iaddq $4, %rdx          # len = lmu + 4
+	# Single step remaining elements
+	je Done
+SingleLoop:
+# 	Code block for offset 0
+	mrmovq 0(%rdi), %r10    # read val from src+0
+	rrmovq %rax, %r11       # Copy count
+	addq %r8, %r11          # count+1
+	andq %r10, %r10         # Test val
+	cmovg %r11, %rax        # If val > 0, count = count+1
+	rmmovq %r10, 0(%rsi)    # Store val at dst+0
+	iaddq $8, %rdi          # src++
+	iaddq $8, %rsi          # dst++
+	iaddq $-1, %rdx         # len--
+	jg SingleLoop           # if len > 0, goto SingleLoop
+
+# #################################################################
+
+# Do not modify the following section of code
+# Function epilogue
+Done:
+	ret
+# ##################################################################
+# # Keep the following label at the end of your function
+End:

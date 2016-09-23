@@ -1,0 +1,242 @@
+# #################################################################
+# ncopy.ys - Copy a src block of len words to dst.
+# Return the number of positive ints (>0) contained in src.
+# 
+# Include your name and ID here.
+# 
+# Describe how and why you modified the baseline code.
+# This code unrolls the main loop by a factor of 12.
+# It finishes by jumping to the appropriate position in a code
+# sequence that copies the possible remaining elements
+# #################################################################
+
+# Do not modify this portion
+# Function prologue
+# %rdi = src, %rsi = dst, %rdx = len
+ncopy:
+
+# #################################################################
+# You can modify this portion
+
+	irmovq $1, %r8          # Constant 1
+	xorq %rax,%rax          # count = 0
+	iaddq $-12, %rdx        # lmu = len - 12
+	jl SkipLoop             # If < 0, skip loop
+
+# Main loop.  Copy 12 elements per iteration
+Loop:
+# 	Code block for offset 0
+	mrmovq 0(%rdi), %r10    # read val from src+0
+	rmmovq %r10, 0(%rsi)    # Store val at dst+0
+	andq %r10, %r10         # Test val
+	jle Npos_m_0            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_m_0:
+# 	Code block for offset 1
+	mrmovq 8(%rdi), %r10    # read val from src+1
+	rmmovq %r10, 8(%rsi)    # Store val at dst+1
+	andq %r10, %r10         # Test val
+	jle Npos_m_1            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_m_1:
+# 	Code block for offset 2
+	mrmovq 16(%rdi), %r10   # read val from src+2
+	rmmovq %r10, 16(%rsi)   # Store val at dst+2
+	andq %r10, %r10         # Test val
+	jle Npos_m_2            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_m_2:
+# 	Code block for offset 3
+	mrmovq 24(%rdi), %r10   # read val from src+3
+	rmmovq %r10, 24(%rsi)   # Store val at dst+3
+	andq %r10, %r10         # Test val
+	jle Npos_m_3            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_m_3:
+# 	Code block for offset 4
+	mrmovq 32(%rdi), %r10   # read val from src+4
+	rmmovq %r10, 32(%rsi)   # Store val at dst+4
+	andq %r10, %r10         # Test val
+	jle Npos_m_4            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_m_4:
+# 	Code block for offset 5
+	mrmovq 40(%rdi), %r10   # read val from src+5
+	rmmovq %r10, 40(%rsi)   # Store val at dst+5
+	andq %r10, %r10         # Test val
+	jle Npos_m_5            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_m_5:
+# 	Code block for offset 6
+	mrmovq 48(%rdi), %r10   # read val from src+6
+	rmmovq %r10, 48(%rsi)   # Store val at dst+6
+	andq %r10, %r10         # Test val
+	jle Npos_m_6            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_m_6:
+# 	Code block for offset 7
+	mrmovq 56(%rdi), %r10   # read val from src+7
+	rmmovq %r10, 56(%rsi)   # Store val at dst+7
+	andq %r10, %r10         # Test val
+	jle Npos_m_7            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_m_7:
+# 	Code block for offset 8
+	mrmovq 64(%rdi), %r10   # read val from src+8
+	rmmovq %r10, 64(%rsi)   # Store val at dst+8
+	andq %r10, %r10         # Test val
+	jle Npos_m_8            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_m_8:
+# 	Code block for offset 9
+	mrmovq 72(%rdi), %r10   # read val from src+9
+	rmmovq %r10, 72(%rsi)   # Store val at dst+9
+	andq %r10, %r10         # Test val
+	jle Npos_m_9            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_m_9:
+# 	Code block for offset 10
+	mrmovq 80(%rdi), %r10   # read val from src+10
+	rmmovq %r10, 80(%rsi)   # Store val at dst+10
+	andq %r10, %r10         # Test val
+	jle Npos_m_10           # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_m_10:
+# 	Code block for offset 11
+	mrmovq 88(%rdi), %r10   # read val from src+11
+	rmmovq %r10, 88(%rsi)   # Store val at dst+11
+	andq %r10, %r10         # Test val
+	jle Npos_m_11           # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_m_11:
+	iaddq $96, %rdi         # src+=12
+	iaddq $96, %rsi         # dst+=12
+	iaddq $-12, %rdx        # lmu-=12
+	jge Loop                # if lmu >= 0, goto Loop
+SkipLoop:
+# Finish remaining elements
+
+# Find jump offset at table position lmu (between -u & -1)
+	addq %rdx, %rdx         # 2*lmu
+	addq %rdx, %rdx         # 4*lmu
+	addq %rdx, %rdx         # 8*lmu
+	mrmovq JTab(%rdx), %rdx # Fetch offset
+	pushq %rdx              # Put jump target on stack
+	ret                     # Jump to it
+jstart:                         # Copying code for remaining possible elements
+# Completion code
+Copied0:
+# 	Code block for offset 10
+	mrmovq 80(%rdi), %r10   # read val from src+10
+	rmmovq %r10, 80(%rsi)   # Store val at dst+10
+	andq %r10, %r10         # Test val
+	jle Npos_c_10           # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_c_10:
+Copied1:
+# 	Code block for offset 9
+	mrmovq 72(%rdi), %r10   # read val from src+9
+	rmmovq %r10, 72(%rsi)   # Store val at dst+9
+	andq %r10, %r10         # Test val
+	jle Npos_c_9            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_c_9:
+Copied2:
+# 	Code block for offset 8
+	mrmovq 64(%rdi), %r10   # read val from src+8
+	rmmovq %r10, 64(%rsi)   # Store val at dst+8
+	andq %r10, %r10         # Test val
+	jle Npos_c_8            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_c_8:
+Copied3:
+# 	Code block for offset 7
+	mrmovq 56(%rdi), %r10   # read val from src+7
+	rmmovq %r10, 56(%rsi)   # Store val at dst+7
+	andq %r10, %r10         # Test val
+	jle Npos_c_7            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_c_7:
+Copied4:
+# 	Code block for offset 6
+	mrmovq 48(%rdi), %r10   # read val from src+6
+	rmmovq %r10, 48(%rsi)   # Store val at dst+6
+	andq %r10, %r10         # Test val
+	jle Npos_c_6            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_c_6:
+Copied5:
+# 	Code block for offset 5
+	mrmovq 40(%rdi), %r10   # read val from src+5
+	rmmovq %r10, 40(%rsi)   # Store val at dst+5
+	andq %r10, %r10         # Test val
+	jle Npos_c_5            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_c_5:
+Copied6:
+# 	Code block for offset 4
+	mrmovq 32(%rdi), %r10   # read val from src+4
+	rmmovq %r10, 32(%rsi)   # Store val at dst+4
+	andq %r10, %r10         # Test val
+	jle Npos_c_4            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_c_4:
+Copied7:
+# 	Code block for offset 3
+	mrmovq 24(%rdi), %r10   # read val from src+3
+	rmmovq %r10, 24(%rsi)   # Store val at dst+3
+	andq %r10, %r10         # Test val
+	jle Npos_c_3            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_c_3:
+Copied8:
+# 	Code block for offset 2
+	mrmovq 16(%rdi), %r10   # read val from src+2
+	rmmovq %r10, 16(%rsi)   # Store val at dst+2
+	andq %r10, %r10         # Test val
+	jle Npos_c_2            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_c_2:
+Copied9:
+# 	Code block for offset 1
+	mrmovq 8(%rdi), %r10    # read val from src+1
+	rmmovq %r10, 8(%rsi)    # Store val at dst+1
+	andq %r10, %r10         # Test val
+	jle Npos_c_1            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_c_1:
+Copied10:
+# 	Code block for offset 0
+	mrmovq 0(%rdi), %r10    # read val from src+0
+	rmmovq %r10, 0(%rsi)    # Store val at dst+0
+	andq %r10, %r10         # Test val
+	jle Npos_c_0            # Skip if <= 0
+	addq %r8, %rax          # count++
+Npos_c_0:
+Copied11:
+
+# #################################################################
+
+# Do not modify the following section of code
+# Function epilogue
+Done:
+	ret
+# #################################################################
+# Jump table
+	.align 8
+	.quad Copied11
+	.quad Copied10
+	.quad Copied9
+	.quad Copied8
+	.quad Copied7
+	.quad Copied6
+	.quad Copied5
+	.quad Copied4
+	.quad Copied3
+	.quad Copied2
+	.quad Copied1
+	.quad Copied0
+JTab:                           # This table has negative offsets
+# ##################################################################
+# # Keep the following label at the end of your function
+End:

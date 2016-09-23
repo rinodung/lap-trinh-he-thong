@@ -1,0 +1,6 @@
+  irmovq $0x100,%rbx  # %rbx <-- 0x100
+  irmovq $0x200,%rdx  # %rdx <-- 0x200 //line:arch:seqeg:irmovq2
+  addq %rdx,%rbx      # %rbx <-- 0x300 CC <-- 000 //line:arch:seqeg:addq
+  je dest             # Not taken //line:arch:seqeg:je
+  rmmovq %rbx,0(%rdx) # M[0x200] <-- 0x300
+dest: halt

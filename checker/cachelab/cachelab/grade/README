@@ -1,0 +1,96 @@
+#####################################################################
+# CS:APP Cache Lab
+# Autograding Scripts
+#
+# Copyright (c) 2013, R. Bryant and D. O'Hallaron, All rights reserved.
+######################################################################
+
+This directory contains autograding scripts for the CS:APP Cache Lab.
+
+Each time a student with login "foo" compiles their work, the Makefile
+automatically generates a handin file called foo-handin.tar. 
+
+If you want to use the autograding scripts in this directory, then you
+should first collect all of these student handin tar files into the
+./handin directory.
+
+
+********
+1. Files
+********
+config.pm
+	Config file for grade-handins.pl and grade-cachelab.pl
+
+grade-cachelab.pl
+	The Cache Lab autograder. Grades a single foo-handin.tar handin
+	file for user foo and emits a report on standard output.
+
+grade-handins.pl
+	A driver that invokes the autograder on every handin tar file
+	in the handin directory.  
+
+handin/ 
+        The handin directory
+
+printdir.pl 
+        Handy script that calls enscript on each file in a directory.
+
+You can see a summary of the command line arguments for each script by
+running them with the -h argument.
+
+##############################
+2. Configuring the autograders
+##############################
+
+The config.pm file contains all of the configuration info for the
+grading scripts. It defines defaults that can be overridden on the
+command lines. In general, you won't need to change anything in
+config.pm, unless you change the location of the driver source files,
+the location of the student handins, or the max points for the assignment.
+
+*********************************************
+1. How to use the grade-cachelab.pl autograder
+*********************************************
+
+Collect all of the student handin files in the ./handin directory. To
+grade a single handin file (say ./handin/droh-handin.tar) type:
+
+	unix> ./grade-cachelab.pl -f handin/droh-handin.tar
+
+By default, this looks for the test code in ../src. You can override
+this with the -s <srcdir> option.  You can also use the -e flag to
+control whether you want the student's handin source files included in
+the grading sheet.
+
+If you have a small class, you can run grade-cachelab.pl manually on
+each handin file. If you have a bigger class, you'll want to use the
+grade-handins.pl programs, which will invoke grade-cachelab.pl on each
+handin file automatically.
+
+*****************************************
+2. How to use the grade-handins.pl driver
+*****************************************
+
+To grade all of the handin files in the ./handin directory, type:
+
+	unix> ./grade-handins.pl
+
+By default, this calls the grade-cachelab.pl autograder for each handin
+file in directory ./handin, and redirects the resulting grade reports
+to files in the ./handin.grades directory. You can override these
+with the -s and -d command line options.
+
+Use the -e flag if you don't want the student's handin file included
+in the output grade sheet.
+
+You can expect that some handins will have problems, either because
+the students forgot to enter their team information, or their code
+won't compile, or their program dumps core. In these cases, the driver
+flags the problem, and goes on to the next handin file.
+
+You can print compact hardcopies of the grade reports using enscript:
+
+	unix> enscript -P<your printer> -2r ./handin.grades/*.out
+
+If you have two-sided printers and want to start each student's
+submission on a new page, you can use the handy printdir.pl script.

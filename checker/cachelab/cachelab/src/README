@@ -1,0 +1,23 @@
+CS:APP Cache Lab Driver
+
+This directory contains the driver code that autogrades the Cache Lab.
+
+********
+Files
+********
+Makefile            - Compiles the sources
+Makefile-handout    - Makefile handed out to students in cachelab-handout
+README              - This file
+README-handout      - README handed out to students in cachelab-handout
+cachelab.{c,h}      - helper functions
+csim-handout.c      - csim.c file handed out to students in cachelab-handout
+csim-ref.c          - csim.c reference solution
+csim.c              - link to csim-ref.c
+driver.py           - driver program that tests csim.c and trans.c
+test-csim.c         - tests csim.c
+test-trans.c        - tests trans.c
+tracegen.c          - produces a tracefile for all registered transpose functions
+traces/             - trace files for testing csim.c
+trans-handout.c     - student start code
+trans-ref.c         - trans.c reference solution
+trans.c             - link to trans-ref.c

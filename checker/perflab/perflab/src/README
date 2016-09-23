@@ -1,0 +1,45 @@
+#####################################################################
+# CS:APP Buffer Lab
+#
+# Instructor's Source Files
+#
+# Copyright (c) 2002, R. Bryant and D. O'Hallaron, All rights reserved.
+# May not be used, modified, or copied without permission.
+#
+######################################################################
+
+driver.c
+	Tests performance of all versions of the rotate and smooth kernels
+	The command line arguments are summarized by the "-h" flag
+	and also explained in more detail in the lab writeup.
+	NOTE: There is a hidden "-t" flag that skips the checking
+	of the team struct. This is handy when you are testing out
+	the kernels-naive.c file that is handed out to students.
+
+kernels.c 
+	This file is linked into the driver program. It contains
+	versions of the rotate and smooth kernels. The file is actually 
+	a soft links to either	kernels-naive.c or kernels-solution.c.
+	Type "make naive" to soft link to the naive versions. Type
+	"make solution" to soft link to the solutions.
+
+config.h
+	Contains all the site-specific information you need to modify 
+	in order to run	driver.c at your site. 
+
+kernels-naive.c
+	The baseline versions of rotate and smooth that are handed
+	out to the students and which they modify.
+
+kernels-solution.c
+	Some solutions to rotate and smooth that give the instructor
+	a sense of the range of speedups.
+
+clock.{c,h}
+fcyc.{c,h}
+	Timing routines that implement the k-best measurement 
+	scheme (Chapter 9) using IA32 cycle counters.
+
+Makefile-handout
+README-handout
+	The Makefile and README that are handed out to the students.

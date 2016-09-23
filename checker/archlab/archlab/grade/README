@@ -1,0 +1,8 @@
+This directory contains the autograders for the CS:APP Arch Lab
+
+Files:
+
+parta/	Autograders for Part A
+partb/	Autograders for Part B
+partc/	Autograders for Part C
+

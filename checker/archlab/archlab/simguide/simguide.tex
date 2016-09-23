@@ -1,0 +1,564 @@
+\documentclass[11pt]{article}
+
+\usepackage{times}
+\usepackage{alltt}
+\usepackage[pdftex]{graphicx} 
+\usepackage{color}
+%\usepackage{hyperref}
+
+\includeonly{}
+
+\input{../../../../decls-handout}
+\input{../../../../decls-common}
+\input{../../../../data/data-defs}
+\input{../../../../asm/asm-defs}
+\input{../../../../arch/arch-defs}
+
+\input{../../../../data/labels.aux}
+
+\begin{document}
+\bibliographystyle{plain}
+
+\title{CS:APP3e Guide to Y86-64 Processor Simulators%
+\thanks{Copyright \copyright{} 2002, 2011, 2015 R. E. Bryant, D. R.
+O'Hallaron.  All rights reserved.}\\
+\vspace*{0.75in}
+\centerline{\includegraphics*[scale=.40]{../../../../arch/pipe-full}}
+}
+
+\author{Randal E. Bryant\\ David R. O'Hallaron}
+
+\maketitle
+
+%\include{../../../../book/book}
+
+This document describes the processor simulators that accompany the
+presentation of the Y86-64 processor architectures in Chapter
+\ref{chap:arch} of {\em Computer Systems: A Programmer's Perspective,
+  Third Edition}.  
+These simulators model three different processor designs: SEQ, SEQ+,
+and PIPE\@.
+
+\section{Installing}
+
+The code for the simulator is distributed as a tar format file named
+ \texttt{sim.tar}.  You can get a copy of this file from the CS:APP3e
+ Web site (\verb@csapp.cs.cmu.edu@).
+
+
+With the tar file in the directory you want to install the code, you
+should be able to do the following:
+\begin{tty}
+\unixprompt{\em tar xf sim.tar}
+\unixprompt{\em cd sim}
+\unixprompt{\em make clean}
+\unixprompt{\em make}
+\end{tty}
+
+By default, this generates GUI (graphic user interface) versions of
+the simulators, which require that you have Tcl/Tk installed on your
+system. If not, then you have the option to install TTY-only
+versions that emit their output as ASCII text on
+stdout. See file {\tt README} for a description of
+how to generate the GUI and TTY versions.
+
+The directory \texttt{sim} contains the following subdirectories:
+
+\begin{description}
+\item[\texttt{misc}]
+
+Source code files for utilities such as \textsc{yas} (the Y86-64
+assembler), \textsc{yis} (the Y86-64 instruction set simulator), and
+\textsc{hcl2c} (HCL to C translator).  
+It also contains the {\tt isa.c} source file that is  used by all of the 
+processor simulators.
+
+\item[\texttt{seq}]
+
+Source code for the SEQ and SEQ+ simulators.  Contains the HCL file
+for homework problem \ref{prob:arch:seq-iaddq}.
+See file \texttt{README} for instructions 
+on compiling the different versions of the simulator.
+
+\item[\texttt{pipe}]
+
+Source code for the PIPE simulator.
+Contains the HCL files for homework problems
+\ref{prob:arch:pipe-iaddq}--\ref{prob:arch:pipe-one-write-port}.  See
+file \texttt{README} for instructions on compiling the different
+versions of the simulator.
+
+\item[\texttt{y86-code}]
+
+Y86-64 assembly code for many of the example programs shown in the
+chapter.  You can automatically test your modified simulators on these
+benchmark programs.  See file \texttt{README} for instructions on how
+to run these tests.  As a running example, we will use the program
+\texttt{asum.ys} in this subdirectory.  This program is shown as
+CS:APP3e Figure \ref{fig:arch:code-ysa}.  The compiled version of the
+program is shown in Figure \ref{fig:sim:code-yssim}.
+
+\item[\texttt{ptest}]
+Scripts that generate systematic regression tests of the different
+instructions, the different jump possibilities, and different hazard
+possibilities.  These scripts are very good at finding bugs in your
+homework solutions.
+See file \texttt{README} for instructions on how to run these tests.
+\end{description}
+
+\begin{figure}
+\begin{ccode}
+\input{code-yssim.tex}
+\end{ccode}
+\mycaption{Sample object code file.}{This code is in the file \texttt{asum.yo} in the
+\texttt{y86-code} subdirectory.}  
+\label{fig:sim:code-yssim}
+\end{figure}
+
+\section{Utility Programs}
+
+Once installation is complete, the \texttt{misc} directory contains
+two useful programs:
+
+\begin{description}
+\item[\textsc{yas}] The Y86-64 assembler.  This takes a Y86-64 assembly code
+file with extension \texttt{.ys} and generates a file with
+extension \texttt{.yo}.  The generated file contains an ASCII
+version of the object code, such as that shown in Figure
+\ref{fig:sim:code-yssim} (The same program as shown in CS:APP3e Figure
+\ref{fig:arch:code-yso} with slightly different formatting.)  The easiest way to invoke the assembler is
+to use or create assembly code files in the \texttt{y86-code}
+subdirectory.  For example, to assemble the program in file
+\texttt{asum.ys} in this directory, we use the command:
+\begin{tty}
+\unixprompt{\em make asum.yo}
+\end{tty}
+
+\item[\textsc{yis}] The Y86-64 instruction simulator.  This program
+executes the instructions in a Y86-64 machine-level program according to
+the instruction set definition.  For example, suppose you want to run
+the program \texttt{asum.yo} from within the subdirectory
+\texttt{y86-code}.  Simply run:
+
+\begin{tty}
+\unixprompt{\em ../misc/yis asum.yo}
+\end{tty}
+
+\textsc{Yis} simulates the execution of the program and then prints
+ changes to any registers or memory locations on the terminal, as
+ described in CS:APP3e Section \ref{sect:arch:Y86-64-isa}.
+\end{description}
+
+\section{Processor Simulators}
+
+For the three processors, SEQ, SEQ+, and PIPE, we have
+provided simulators \textsc{ssim}, \textsc{ssim+}, and
+\textsc{psim} respectively. Each simulator can be run in 
+TTY or GUI mode:
+
+\begin{description}
+\item [TTY mode]
+Uses a minimalist, terminal-oriented interface.  Prints
+everything on the terminal output.  Not very convenient for debugging
+but can be installed on any system and can be used for
+automated testing. The default mode for all simulators.
+
+\item [GUI mode] Has a graphic user interface, to be described
+  shortly.  Very helpful for visualizing the processor activity and
+  for debugging modified versions of the design.  Requires
+  installation of Tcl/Tk on your system. Invoked with the \texttt{-g}
+  command line option.  {\em Running in GUI mode is only possible from
+    within the directory (\texttt{pipe} or \texttt{seq}) in which the
+    executable simulator program is located.}
+
+\end{description}
+
+\subsection{Simulator Command Line Options}
+
+For all three simulators, you can specify several options from the command line:
+\begin{description}
+
+\item [\texttt{-h}]  
+Prints a summary of all of the command line options.
+
+\item[\texttt{-g} ]
+Run the simulator in GUI mode (the default is TTY mode). 
+
+\item[\texttt{-t} ]
+(TTY mode only) Runs both the processor and the ISA simulators, comparing the
+resulting values of the memory, register file, and condition codes.
+If no discrepancies are found, it prints the message ``ISA Check
+Succeeds.''  Otherwise, it prints information about the words of the
+register file or memory that differ.  This feature is very useful for
+testing the processor designs.
+
+\item[\texttt{-l m} ]
+(TTY mode only) Sets the instruction limit, executing at most $m$ instructions
+before halting (the default limit is 10000 instructions).
+
+\item[\texttt{-v n} ]
+(TTY mode only) Sets the verbosity level to $n$, which must be between 0 and 2 with a
+default value of 2. 
+
+
+\end{description}
+Simulators running in GUI mode must be invoked with the name of an object
+file on the command line. In TTY mode, the object file name is
+optional, coming from \texttt{stdin} by default. 
+
+Here are some typical invocations of the simulators from within the \texttt{seq} subdirectory:
+\begin{tty}
+\unixprompt{\em ./ssim -h}
+\unixprompt{\em ./ssim+ -t < ../y86-code/asum.yo}
+\unixprompt{\em ./ssim -g ../y86-code/asum.yo}
+\end{tty}
+The first case prints a summary of the command line options for
+\textsc{ssim}.  The second case runs \textsc{ssim+} in TTY mode,
+reading object file \texttt{asum.yo} from \texttt{stdin}.  The resulting register and memory values
+are compared with those from the higher-level ISA simulator.
+The third case runs
+\textsc{ssim} in GUI mode, executing the instructions in object code file 
+\texttt{asum.yo} from the \texttt{y86-code} subdirectory.  The same invocations
+would work for the PIPE simulator \textsc{psim} from within the \texttt{pipe} subdirectory.
+
+\subsection{GUI Version of SEQ Simulator}
+
+\begin{figure}
+\centerline{\includegraphics*[scale=1.0]{seq-cntl}}
+\caption{Main control panel for SEQ simulator}
+\label{fig:sim:seq-cntl}
+\end{figure}
+
+\begin{figure}
+\centerline{\includegraphics*[scale=1.0]{seq-code}}
+\caption{Code display window for SEQ simulator}
+\label{fig:sim:seq-code}
+\end{figure}
+
+\begin{figure}
+\centerline{\includegraphics*[scale=1.0]{seq-mem}}
+\caption{Memory display window for SEQ simulator}
+\label{fig:sim:seq-mem}
+\end{figure}
+
+The GUI version of the SEQ processor simulator is invoked from within the \texttt{seq} subdirectory with 
+an object code filename on the command line:
+\begin{tty}
+\unixprompt{\em ./ssim -g ../y86-code/asum.yo &}
+\end{tty}
+where the ``\texttt{\&}'' at the end of the command line allows the
+simulator to run in background mode.  The simulation program starts up
+and creates three windows, as illustrated in Figures
+\ref{fig:sim:seq-cntl}--\ref{fig:sim:seq-mem}.
+
+The first window (Figure \ref{fig:sim:seq-cntl}) is the main control
+panel. If the HCL file was compiled by \textsc{hcl2c} with the
+\texttt{-n name} option, then the title of the main control window will appear
+as ``\texttt{Y86-64 Processor: name}''
+Otherwise it will appear as simply
+``\texttt{Y86-64 Processor}.''
+
+The main control window contains buttons to control the simulator as
+well as status information about the state of the processor.  The
+different parts of the window are labeled in the figure:
+
+\begin{description}
+\item[Control:] The buttons along the top control the simulator.
+Clicking the \ival{Quit} button causes the simulator to exit.
+Clicking the \ival{Go} button causes the simulator to start running.
+Clicking the \ival{Stop} button causes the simulator to stop
+temporarily.  Clicking the \ival{Step} button causes the simulator to
+execute one instruction and then stop.  Clicking the \ival{Reset}
+button causes the simulator to return to its initial state, with the
+program counter at address 0, the registers set to zeros, the memory
+erased except for the program, the condition codes set with
+$\mzf = 1$, $\mcf = 0$, and $\mof = 0$, and the program status set to
+\verb@AOK@.
+
+The slider below the buttons controls the speed of the simulator when
+it is running.  Moving it to the right makes the simulator run faster.
+
+\item[Stage values:] 
+This part of the display shows the values of the
+different processor signals during the current instruction evaluation.
+These signals are almost identical to those shown in CS:APP3e Figure
+\ref{fig:arch:seq-full}.  The main difference is that the simulator
+displays the name of the instruction in a field labeled \ival{Instr},
+rather than the numeric values of \ival{icode} and \ival{ifun}.
+Similarly, all register identifiers are shown using their names,
+rather  than their numeric values, with
+``\texttt{----}'' indicating that no register access is required.
+\item[Register file:] This section displays the values of the 15
+program registers.  The register that has been updated most recently
+is shown highlighted in light blue.  Register contents are not displayed
+until after the first time they are set to nonzero values.
+
+Remember that when an instruction writes to a program register, the
+register file is not updated until the beginning of the next clock
+cycle.  This means that you must step the simulator one more time to
+see the update take place.
+
+\item[Stat:] This shows the status of the current instruction being
+executed.  The possible values are:
+\begin{description}
+\item[\texttt{AOK}:] No problem encountered.
+\item[\texttt{ADR}:] An addressing error has occurred either trying to read an
+instruction or trying to read or write data.  Addresses cannot exceed
+\texttt{0x0FFF}.
+\item[\texttt{INS}:] An illegal instruction was encountered.
+\item[\texttt{HLT}:] A \texttt{halt} instruction was encountered.
+\end{description}
+
+\item[Condition codes:]
+These show the values of the three condition codes: 
+\texttt{ZF}, \texttt{SF}, and \texttt{OF}\@.
+
+Remember that when an instruction changes the condition codes, the
+condition code register is not updated until the beginning of the next clock
+cycle.  This means that you must step the simulator one more time to
+see the update take place.
+
+\end{description}
+
+The processor state illustrated in Figure \ref{fig:sim:seq-cntl} is
+for the first execution of line \ref{line:sim:asum:subq} of the \texttt{asum.yo} program
+shown in Figure \ref{fig:sim:code-yssim}.  We can see that the program
+counter is at \texttt{0x085}, that it has processed the instruction
+\texttt{addq \rviiireg{}, \rdireg{}}, that register \raxreg{} holds
+\texttt{0xd000d000d}, the sum of the first array element, and \rsireg{}
+holds 4, the count that is about to be decremented.  Register
+\rdireg{} holds \texttt{0x020}, the address of the second array
+element.  There
+is a pending write of \texttt{0x03} to register \rsireg{}
+(since \ival{dstE} is set to \rsireg{} and \ival{valE} is set
+to \texttt{0x03}).  This write will take place at the start of the
+next clock cycle.
+
+The window depicted in Figure \ref{fig:sim:seq-code} shows the object
+code file that is being executed by the simulator.
+The edit box
+identifies the file name of the program being executed.  You can edit
+the file name in this window and click the \ival{Load} button to load
+a new program.  The left hand side of the display shows the object
+code being executed, while the right hand side shows the text from the
+assembly code file.  The center has an asterisk (\texttt{*}) to
+indicate which instruction is currently being simulated.  This
+corresponds to line \ref{line:sim:asum:subq} of the \texttt{asum.yo} program shown in Figure
+\ref{fig:sim:code-yssim}.
+
+The window shown in Figure \ref{fig:sim:seq-mem} shows the contents of
+the memory.  It shows only those locations between the minimum and
+maximum addresses that have changed since the program began executing.
+Each row shows the contents of two memory words.  Thus, each row
+shows 16 bytes of the memory, where the addresses of the bytes differ
+in only their least significant hexadecimal digits.  To the left of
+the memory values is the ``root'' address, where the least significant
+digit is shown as ``\texttt{-}''.  Each column then corresponds to
+words with least significant address digits \texttt{0x0},
+and \texttt{0x8}.  The example shown in
+Figure \ref{fig:sim:seq-mem} has arrows indicating memory locations
+\texttt{0x01f0} and \texttt{0x01f8}.
+
+The memory contents illustrated in the figure show the stack contents
+of the \texttt{asum.yo} program shown in Figure \ref{fig:sim:code-yssim} during the
+execution of the \texttt{sum} procedure.  Looking at the stack
+operations that have taken place so far, we see that \rspreg{} was
+initialized to \texttt{0x200} (line \ref{line:sim:asum:initrsp}).  The call to
+\texttt{main} on line \ref{line:sim:asum:callmain} pushes the return pointer \texttt{0x013},
+which is written to address \texttt{0x01f8}.  Procedure \texttt{main}
+calls \texttt{sum} (line \ref{line:sim:asum:callsum}), causing
+the return pointer \texttt{0x055} to be written to
+address \texttt{0x01f0}.
+That accounts for all of the words shown
+in this memory display, and for the stack pointer being set to \texttt{0x01f0}.
+
+\subsection{PIPE Simulator}
+\begin{figure}
+\centerline{\includegraphics*[scale=1.0]{pipe-cntl}}
+\caption{Main control panel for PIPE simulator}
+\label{fig:sim:pipe-cntl}
+\end{figure}
+
+\begin{figure}
+\centerline{\includegraphics*[scale=1.0]{pipe-register}}
+\caption{View of single pipe register in control panel for PIPE
+simulator}
+\label{fig:sim:pipe-register}
+\end{figure}
+
+The PIPE simulator also generates three windows.  Figure
+\ref{fig:sim:pipe-cntl} shows the control panel.  It has the same set
+of controls, and the same display of the register file, status, and condition
+codes.  The middle section shows the state of the pipeline registers.
+The different fields correspond to those in CS:APP3e Figure
+\ref{fig:arch:pipe-full}. At the bottom of this panel is a display
+showing the number of cycles that have been simulated (not
+including the initial cycles required to get the pipeline flowing),
+the number of instructions that have completed, and the resulting
+CPI\@.
+
+As illustrated in the close-up view of Figure
+\ref{fig:sim:pipe-register}, each pipeline register is displayed with
+two parts.  The upper values in white boxes show the current values in
+the pipeline register.  The lower values with a gray background show
+the inputs to pipeline register.  These will be loaded into the
+register on the next clock cycle, unless the register bubbles or
+stalls.
+
+The flow of values through the PIPE simulator is quite different from
+that for the SEQ simulator.  With SEQ, the control
+panel shows the values resulting from executing a single instruction.
+Each step of the simulator performs one complete instruction execution.
+With PIPE, the control panel shows the values for the multiple
+instructions flowing through the pipeline.  Each step of the simulator
+performs just one stage's worth of computation for each instruction.
+
+\begin{figure}
+\centerline{\includegraphics*[scale=1.0]{pipe-code}}
+\caption{Code display window for PIPE simulator}
+\label{fig:sim:pipe-code}
+\end{figure}
+
+Figure \ref{fig:sim:pipe-code} shows the code display for the PIPE
+simulator.  The format is similar to that for SEQ, except
+that rather than a single marker indicating which instruction is being
+executed, the display indicates which instructions are in each
+stage of the pipeline, using characters \texttt{F}, \texttt{D},
+\texttt{E}, \texttt{M}, and \texttt{W}, for the fetch, decode,
+execute, memory, and write-back stages.
+
+The PIPE simulator also generates a window to display the memory
+contents.  This has an identical format to the one shown for SEQ
+(Figure \ref{fig:sim:seq-mem}).
+
+The example shown in Figures \ref{fig:sim:pipe-cntl} and
+\ref{fig:sim:pipe-code} show the status of the pipeline when executing
+the loop in lines \ref{line:sim:asum:loopstart}--\ref{line:sim:asum:loopend} of Figure \ref{fig:sim:code-yssim}.  We can see
+that the simulator has begun the first iteration of the loop, having entered the
+loop by jumping to the test portion (line \ref{line:sim:asum:loopend}).
+The status of the stages is as follows:
+\begin{description}
+\item[Write back:] The \texttt{jne} instruction (line \ref{line:sim:asum:loopend}) of the initial test is finishing.
+
+\item[Memory:] The \texttt{mrmovq} instruction (line \ref{line:sim:asum:loopstart}) has just read
+\texttt{0x0D000D000D} from address \texttt{0x018}.  We can see the address in
+\ival{valE} of pipeline register M, and the value read from
+memory at the input of \ival{valM} to pipeline register W\@.
+
+\item[Execute:] This stage contains a bubble.  The bubble was inserted
+due to the load-use dependency between the \texttt{mrmovq} instruction
+(line \ref{line:sim:asum:loopstart}) and the \texttt{addq} instruction (line \ref{line:sim:asum:addq}).  It can be seen
+that this bubble acts like a \texttt{nop} instruction.  This explains why
+there is no instruction in Figure \ref{fig:sim:pipe-code} labeled with ``E.''
+
+\item[Decode:] The \texttt{addq} instruction (line \ref{line:sim:asum:addq}) has just read
+\texttt{0x0} from register \raxreg{}.  It also read \texttt{0x00D}
+from register \rxreg{}, but we can see that the forwarding logic has
+instead used the value \texttt{0x0D000D000D} that has just been read from
+memory (seen as the input to \ival{valM} in pipeline register W) as
+the new value of \ival{valA} (seen as the input to \ival{valA} in
+pipeline register E).
+
+\item[Fetch:] An \texttt{addq} instruction (line \ref{line:sim:asum:addq2}) has just been
+fetched from address \texttt{0x083}.  The new value of the PC is
+predicted to be \texttt{0x085}.
+\end{description}
+
+Associated with each stage is its status field \texttt{Stat}
+This field shows the status of the instruction in that
+ stage of the pipeline.  Status \texttt{AOK} means that no exception has
+ been encountered.  Status value \texttt{BUB} indicates that a bubble is in this
+ stage, rather than a normal instruction.  Other possible status
+ values are: \texttt{ADR} when an invalid memory location is referenced,
+\texttt{INS} when an illegal instruction code is encountered, \texttt{PIP} when
+ a problem arose in the pipeline (this occurs when both the stall and
+ the bubble signals for some pipeline register are set to 1),
+and \texttt{HLT}
+ when a halt instruction is encountered.  The simulator will stop
+ when any of these last four cases reaches the write-back stage.
+
+Carrying the status for an individual instruction through
+ the pipeline along with the rest of the information about that
+ instruction enables precise handling of the different exception
+ conditions, as described in CS:APP3e Section \ref{sect:arch:pipe-exceptions}.
+
+\section{Some Advice}
+
+The following are some miscellaneous tips, learned from experience we
+have gained in using these simulators.
+
+\begin{itemize}
+\item {\em Get familiar with the simulator operation.}  Try running
+some of the example programs in the \texttt{y86-code} directory.  Make
+sure you understand how each instruction gets processed for some small
+examples.  Watch for interesting cases such as mispredicted branches,
+load interlocks, and procedure returns.
+
+\item {\em You need to hunt around for information.}  Seeing the
+effect of data forwarding is especially tricky.  There are seven
+possible sources for signal \ival{valA} in pipeline register E, and
+six possible sources for signal \ival{valB}\@.  To see which one was
+selected, you need to compare the input to these pipeline register
+fields to the values of the possible sources.
+The possible sources
+are:
+\begin{description}
+\item[$\regref{\ival{d\_srcA}}$] The source register is identified by
+the input to \ival{srcA} in pipeline register E\@.  The register contents are shown at the bottom.
+\item[$\regref{\ival{d\_srcB}}$] The source register is identified by
+the input to \ival{srcB} in pipeline register E\@.  The register contents are shown at the bottom.
+\item[\ival{D\_valP}] This value is part of the state of pipeline register D\@.
+\item[\ival{e\_valE}] This value is at the input to field \ival{valE}
+in pipeline register M\@.
+\item[\ival{M\_valE}] This value is part of the state of pipeline register M\@.
+\item[\ival{m\_valM}] This value is at the input to field \ival{valM}
+in pipeline register W.
+\item[\ival{W\_valE}] This value is part of the state of pipeline register W\@.
+\item[\ival{W\_valM}] This value is part of the state of pipeline register M\@.
+\end{description}
+
+\item {\em Do not overwrite your code.}  Since the data and code share
+the same address space, it is easy to have a program overwrite some of
+the code, causing complete chaos when it attempts to execute the
+overwritten instructions.  It is important to set up the stack to be
+far enough away from the code to avoid this.
+
+\item {\em Avoid large address values.}  The simulators do not allow
+any addresses greater than \texttt{0x0FFF}.  In addition, the memory
+display becomes unwieldy if you modify memory locations spanning a
+wide range of addresses.
+
+\item {\em Be aware of some ``features'' of the GUI-mode simulators
+(\textsc{ssim}, \textsc{ssim+}, and \textsc{psim}.)}
+\begin{itemize}
+\item
+You must must execute the programs from their home directories.  In
+other words, to run \textsc{ssim} or \textsc{ssim+}, you must be in
+the \texttt{seq} directory, while you must be in the \texttt{pipe}
+subdirectory to run \textsc{psim}.  This requirement arises due to the
+way the Tcl interpreter locates the configuration file for
+the simulator.
+
+\item If you are running in GUI mode on a Unix box, remember to
+initialize the DISPLAY environment variable:
+\begin{tty}
+unix> {\em setenv DISPLAY myhost.edu:0}
+\end{tty}
+
+\item With some Unix X Window managers, the ``Program Code'' window 
+begins life as a closed icon. If you don't see this window when the
+simulator starts, you'll need to expand the expand manually by
+clicking on it.
+
+\item With some Microsoft Windows X servers, the ``Memory Contents'' window
+does not automatically resize itself when the memory contents change.
+In these cases, you'll need to resize the window manually to see the
+memory contents.
+
+\item The simulators 
+will terminate with a segmentation fault if you ask them to execute a file
+that is not a valid Y86-64 object file.
+\end{itemize}
+
+\end{itemize}
+\end{document}

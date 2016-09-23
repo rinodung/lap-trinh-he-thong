@@ -1,0 +1,107 @@
+#####################################################################
+# CS:APP Proxy Lab
+# Directions to Instructors
+#
+# Copyright (c) 2003, R. Bryant and D. O'Hallaron, All rights reserved.
+# May not be used, modified, or copied without permission.
+#
+######################################################################
+
+This directory contains the files that you will need to run the CS:APP
+proxy lab. The lab is the student's first experience with network
+programming and application-leel concurrency that requires
+synchronization.
+
+************
+1. Overview
+************
+
+In this lab, students build a concurrent Web proxy that logs all
+client requests to a shared log file.
+
+Proxies are nice teaching tools because they act as servers to their
+Web browser clients, and as clients to their end servers. Thus
+students get experience programming clients and servers in a single
+program. Writing a working proxy is exciting for students because it
+plugs directly into the existing Internet infrastructure. The students
+get excited when they see their code proxying requests from real
+browsers to real Web sites.
+
+There is no autograder for this lab. Typically, the teaching staff
+schedule live demos with each student team and it is evaluated during
+the demo.
+
+The reference solution is in ./src/proxy.c
+
+********
+2. Files
+********
+
+README
+proxylab-handout/	Handout directory that is given to the students
+src/			Proxy solution
+writeup/		Sample Latex lab writeup
+
+*******************
+3. Building the Lab
+*******************
+
+To build the lab, modify the Latex lab writeup in
+./writeup/proxylab.tex for your environment. Then type the following
+in the current directory:
+
+    unix> make clean
+    unix> make 
+
+First, the Makefile formats the lab writeup and then copies a solution
+template file (proxy.c) to the proxylab-handout directory, along with
+the the csapp.c file described in the CS:APP text. The template file
+contains a few helper functions to handle uninteresting tasks such as
+formatting log entries and parsing HTTP URI fields. Students will
+prepare their solutions by completing the proxy.c template.
+
+Finally, the Makefile builds a tarfile of the proxylab-handout directory
+(in proxylab-handout.tar) which you can distribute to students.  The
+command:
+
+    unix> make dist DEST=<DIR>
+
+will copy the tarfile and copies of the writeup to directory <DIR>,
+where the students can access it.
+
+******************
+4. Grading the Lab
+******************
+
+There is no autograding script for the proxylab. It is usually
+evaluated via personal demos to the teaching staff. This is the last
+lab of the term, and we've found that getting a chance to meet all of
+the students personally and letting them show off their accomplishment
+is a very nice way to end the term. Here is a suggested grading
+criteria:
+
+1. Basic correctness (30 points)
+
+Here you want to verify that proxy can serve Web pages with both text
+and graphics. 20 points if can serve some simple Web page at your
+site. 10 additional points if they can correctly serve more complex
+pages such www.yahoo.com, www.aol.com, and www.nfl.com.
+
+2. Concurrent execution (20 points)
+
+In this part we want to verify that they can handle concurrent
+connections. 15 points if they can pass the following test: (a) Open a
+connection to your proxy using telnet, and then leave it open without
+typing in any data.  (b) Use a Web browser (pointed at the proxy) to
+request a simple Web from some end server. 5 additional points if the
+updates to the shared log file are protected with semaphores, and if
+all functions are thread safe. In particulare, make sure that any
+calls to thread-unsafe functions like inet_ntoa and gethostbyaddr are
+protected by the lock and copy technique described in CS:APP 13.7.1.
+
+3. Programming style (10 points) 
+
+Here we are mainly looking for good commenting, including a header at
+the beginning of the file describing the overall operation of the
+proxy, and header comments before each function.
+

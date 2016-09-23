@@ -1,0 +1,12 @@
+\begin{tabular}{|ll|c|c|c|c|}
+\hline
+\multicolumn{2}{|c|}{Operation} & \multicolumn{4}{|c|}{Register $R$} \\
+\cline{3-6}
+ & & \verb@%al@ & \verb@%cl@ & \verb@%dl@ & \verb@%bl@ \\
+\hline
+ \texttt{andb} & \texttt{$R$, $R$} & \verb@20 c0@ & \verb@20 c9@ & \verb@20 d2@ & \verb@20 db@ \\
+ \texttt{orb} & \texttt{$R$, $R$} & \verb@08 c0@ & \verb@08 c9@ & \verb@08 d2@ & \verb@08 db@ \\
+ \texttt{cmpb} & \texttt{$R$, $R$} & \verb@38 c0@ & \verb@38 c9@ & \verb@38 d2@ & \verb@38 db@ \\
+ \texttt{testb} & \texttt{$R$, $R$} & \verb@84 c0@ & \verb@84 c9@ & \verb@84 d2@ & \verb@84 db@ \\
+\hline
+\end{tabular}

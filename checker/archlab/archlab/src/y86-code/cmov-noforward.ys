@@ -1,0 +1,9 @@
+# Code to demonstrate the risk of forwarding from a not-taken conditionaqmove
+/* $begin cmov-noforward-ys */
+	irmovq $0x123,%rax
+	irmovq $0x321,%rdx
+	xorq %rcx,%rcx		# CC = 100
+	cmovne	%rax,%rdx	# Not transferred
+	addq %rdx,%rdx		# Should be 0x642
+	halt
+/* $end cmov-noforward-ys */

@@ -1,0 +1,17 @@
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\multicolumn{9}{l}{\texttt{movq $S$, $D$}} \\
+\hline
+Source & \multicolumn{8}{|c|}{Destination $D$} \\
+\cline{2-9}
+  $S$ & \verb@%rax@ & \verb@%rcx@ & \verb@%rdx@ & \verb@%rbx@ & \verb@%rsp@ & \verb@%rbp@ & \verb@%rsi@ & \verb@%rdi@ \\
+\hline
+\verb@%rax@ & \texttt{48 89 c0} & \texttt{48 89 c1} & \texttt{48 89 c2} & \texttt{48 89 c3} & \texttt{48 89 c4} & \texttt{48 89 c5} & \texttt{48 89 c6} & \texttt{48 89 c7} \\
+\verb@%rcx@ & \texttt{48 89 c8} & \texttt{48 89 c9} & \texttt{48 89 ca} & \texttt{48 89 cb} & \texttt{48 89 cc} & \texttt{48 89 cd} & \texttt{48 89 ce} & \texttt{48 89 cf} \\
+\verb@%rdx@ & \texttt{48 89 d0} & \texttt{48 89 d1} & \texttt{48 89 d2} & \texttt{48 89 d3} & \texttt{48 89 d4} & \texttt{48 89 d5} & \texttt{48 89 d6} & \texttt{48 89 d7} \\
+\verb@%rbx@ & \texttt{48 89 d8} & \texttt{48 89 d9} & \texttt{48 89 da} & \texttt{48 89 db} & \texttt{48 89 dc} & \texttt{48 89 dd} & \texttt{48 89 de} & \texttt{48 89 df} \\
+\verb@%rsp@ & \texttt{48 89 e0} & \texttt{48 89 e1} & \texttt{48 89 e2} & \texttt{48 89 e3} & \texttt{48 89 e4} & \texttt{48 89 e5} & \texttt{48 89 e6} & \texttt{48 89 e7} \\
+\verb@%rbp@ & \texttt{48 89 e8} & \texttt{48 89 e9} & \texttt{48 89 ea} & \texttt{48 89 eb} & \texttt{48 89 ec} & \texttt{48 89 ed} & \texttt{48 89 ee} & \texttt{48 89 ef} \\
+\verb@%rsi@ & \texttt{48 89 f0} & \texttt{48 89 f1} & \texttt{48 89 f2} & \texttt{48 89 f3} & \texttt{48 89 f4} & \texttt{48 89 f5} & \texttt{48 89 f6} & \texttt{48 89 f7} \\
+\verb@%rdi@ & \texttt{48 89 f8} & \texttt{48 89 f9} & \texttt{48 89 fa} & \texttt{48 89 fb} & \texttt{48 89 fc} & \texttt{48 89 fd} & \texttt{48 89 fe} & \texttt{48 89 ff} \\
+\hline
+\end{tabular}

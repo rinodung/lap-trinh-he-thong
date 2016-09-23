@@ -1,0 +1,11 @@
+	irmovq $0xa1,%rbx
+	irmovq $0xbb00, %rcx
+	irmovq $0xa2,%rbx
+	irmovq $0xa3,%rbx
+	addq %rbx,%rcx
+	rmmovq %rcx,100(%rsi)
+	irmovq $0x314,%rax
+	nop
+	nop
+	halt
+

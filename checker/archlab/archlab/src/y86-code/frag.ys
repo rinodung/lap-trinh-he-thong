@@ -1,0 +1,59 @@
+# /* $begin data-dep-ys */
+    irmovq $50,%rax 	//line:arch:frag:irmovq
+    addq %rax,%rbx 	//line:arch:frag:addq
+    mrmovq 100(%rbx),%rdx //line:arch:frag:mrmovq
+# /* $end data-dep-ys */
+
+# /* $begin control-dep-ys */
+loop:
+    subq %rdx,%rbx //line:arch:frag:subq
+    jne targ	//line:arch:frag:jne
+    irmovq $10,%rdx //line:arch:frag:irmovq2
+    jmp loop
+targ:
+    halt //line:arch:frag:halt
+# /* $end control-dep-ys */
+
+# /* $begin pipe-popq-ys */
+    irmovq $5, %rdx
+    irmovq $0x100,%rsp
+    rmmovq %rdx,0(%rsp)
+    popq %rsp		
+    rrmovq %rsp,%rax //line:arch:frag:rrmovq
+# /* $end pipe-popq-ys */
+
+# /* $begin pipe-popq2-ys */
+    irmovq $5, %rdx
+    irmovq $0x100,%rsp
+    rmmovq %rdx,0(%rsp)
+    popq %rsp
+    nop
+    nop
+    rrmovq %rsp,%rax
+# /* $end pipe-popq2-ys */
+
+
+# /* $begin load-store-ys */
+    mrmovq 0(%rcx),%rdx   # Load  1
+    pushq  %rdx           # Store 1
+    nop
+    popq %rdx             # Load  2
+    rmmovq %rax,0(%rdx)   # Store 2
+# /* $end load-store-ys */
+
+# /* $begin addr-exception-ys */
+    irmovq $1,%rax
+    xorq %rsp,%rsp        # Set stack pointer to 0 and CC to 100
+    pushq %rax            # Attempt to write to 0xfffffffffffffff8
+    addq  %rax,%rax       # (Should not be executed) Would set CC to 000
+# /* $end addr-exception-ys */
+    irmovq $2, %rax       # Not executed
+    irmovq $3, %rax	  # Not executed
+
+# /* $begin basic-ys */
+  irmovq  $1,%rax  # I1
+  irmovq  $2,%rbx  # I2
+  irmovq  $3,%rcx  # I3
+  irmovq  $4,%rdx  # I4
+  halt             # I5
+# /* $end basic-ys */

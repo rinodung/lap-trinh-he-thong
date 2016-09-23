@@ -1,0 +1,19 @@
+phase 1: Public speaking is very easy.
+
+phase 2: 1 2 6 24 120 720
+
+phase 3: This phase has multiple answers, each line indicates a correct answer.
+ - 0 q 777
+ - 1 b 214
+ - 2 b 755
+ - 3 k 251
+ - 4 o 160
+ - 5 t 458	
+ - 6 b 524
+
+phase 4: 9
+
+phase 5: This phase has multiples answers. One of them is: 
+	opekma
+
+phase 6: 4 2 6 3 1 5

@@ -1,0 +1,14 @@
+\begin{alltt}
+{\scriptsize   1} void touch2(unsigned val)
+{\scriptsize   2} \verb:{:
+{\scriptsize   3}     vlevel = 2;       /* Part of validation protocol */
+{\scriptsize   4}     if (val == cookie) \verb:{:
+{\scriptsize   5}         printf("Touch2!: You called touch2(0x%.8x)\verb:\n:", val);
+{\scriptsize   6}         validate(2);
+{\scriptsize   7}     \verb:}: else \verb:{:
+{\scriptsize   8}         printf("Misfire: You called touch2(0x%.8x)\verb:\n:", val);
+{\scriptsize   9}         fail(2);
+{\scriptsize  10}     \verb:}:
+{\scriptsize  11}     exit(0);
+{\scriptsize  12} \verb:}:
+\end{alltt}

@@ -1,0 +1,46 @@
+# Initial code
+	irmovq Stack,%rsp
+	irmovq $3,%rdx
+	irmovq dest,%rsi
+	irmovq src,%rdi
+	call copy_block
+	halt
+
+.align 8
+# Source array
+src:
+	.quad 0x00a
+	.quad 0x0b0
+	.quad 0xc00
+
+# Destination array
+dest:
+	.quad 0x111
+	.quad 0x222
+	.quad 0x333
+
+# long copy_block(long *src, long *dest, long len)
+# src in %rdi, dest in %rsi, len in %rdx
+copy_block:
+	xorq %rax,%rax		# result = 0
+	andq %rdx,%rdx		# len : 0?
+	jle L4			# <=, goto done
+L5:	mrmovq (%rdi),%r10	# Loop: val = *src
+	rmmovq %r10,(%rsi)	# *dest = val
+	irmovq $8,%r11
+	addq %r11,%rdi		# src++
+	addq %r11,%rsi		# dest++
+	xorq %r10,%rax		# result ^= val
+ 	irmovq $1,%r11
+	subq %r11,%rdx		# len--
+	jg L5			# if len > 0, goto Loop
+L4:	ret			# Return
+
+.pos 0x100
+Stack:
+
+
+
+
+
+

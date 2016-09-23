@@ -1,0 +1,99 @@
+#####################################################################
+# CS:APP Architecture Lab Part C
+# Autograding Scripts
+#
+# Copyright (c) 2002-2015, R. Bryant and D. O'Hallaron, All rights reserved.
+######################################################################
+
+This directory contains autograding scripts for Part C of the
+CS:APP Architecture Lab.
+
+********
+1. Files
+********
+
+config.pm
+	Config file for grade-mhandins.pl and grade-archlabc.pl
+
+grade-archlabc.pl
+	The autograder. Runs and evaluates the seq-full.hcl
+	for correct implementation of the iaddq and leave instructions.
+
+
+grade-mhandins.pl
+	A driver that invokes the autograder on every set of handin
+	files in the handin directory.
+
+handin/
+	The handin directory
+
+handin.grades/
+	Generated grade reports
+
+printdir.pl
+	A handy script that calls enscript on each file in a directory.
+
+You can see a summary of the command line arguments for each script by
+running them with the -h argument.
+
+##############################
+2. Configuring the autograders
+##############################
+
+The config.pm file contains all of the configuration info for the
+grading scripts. It defines defaults that can be overridden on the
+command lines. In general, you won't need to change anything in
+config.pm.
+
+**********************************************
+3. How to use the grade-archlabc.pl autograder
+**********************************************
+
+Collect all of the student handin files in the ./handin directory, and  
+prepend a unique prefix to each student's files. 
+
+To grade a single student, type
+
+	unix> ./grade-archlabc.pl -f handin/userid
+
+where userid is the unique prefix for the files handin/userid-*
+
+You can override the default location of the Y86-64 tools in config.pm
+using the -s <codedir> option.  You can also use the -e flag to
+control whether you want the student's handin source file included in
+the grading sheet.
+
+If you have a small class, you can run grade-archlabc.pl manually on
+each handin file. If you have a bigger class, you'll want to use the
+grade-mhandins.pl driver, which will invoke grade-archlabc.pl on each
+handin file automatically.
+
+
+******************************************
+4. How to use the grade-mhandins.pl driver
+******************************************
+
+To grade all of the handin files in the ./handin directory, type:
+
+	unix> ./grade-mhandins.pl
+
+By default, this calls the grade-archlabc.pl autograder for each set
+of handin files in directory ./handin, and redirects the resulting
+grade reports to files in the ./handin.grades directory. You can
+override these with the -s and -d command line options.
+
+Use the -e flag if you don't want the student's handin file included
+in the output grade sheet.
+
+You can expect that some handins will have problems, such as the code
+won't compile, or their program dumps core. In these cases, the driver
+flags the problem, and goes on to the next handin file.
+
+You can print compact hardcopies of the grade reports using enscript:
+
+	unix> enscript -P<your printer> -2r ./handin.grades/*.out
+
+If you have two-sided printers and want to start each student's
+submission on a new page, you can use the handy printdir.pl script.
+	
+	unix> (cd handin.grades; ../printdir.pl -P<your printer>)

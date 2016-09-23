@@ -1,0 +1,83 @@
+$c	This is the master version of the asum code
+$c	It needs to be processed by the program vextract.pl in the ../hcl directory
+$c	It can be used to generate four different versions of the program:
+$c	   a: Only code for sum function.  To be processed by s2tex
+$c	   s: Entire program in assembly code.  To be processed by c2tex
+$c	   o: Entire code in "object" code.  To be processes by c2tex
+$c	   y: Entire program in standard assembly code.  
+$c	   g: Entire program in standard assembly code, with annotations for the simulator guide  
+$!gy	/* $begin code-yso */
+$!gy	/* $begin code-ysa */
+$g	/* $begin code-yssim */
+# Execution begins at address 0 
+$s		.pos 0 //line:arch:asum:pos0
+$!s		.pos 0
+$s		irmovq stack, %rsp  	# Set up stack pointer  //line:arch:asum:initrsp
+$g		irmovq stack, %rsp  	# Set up stack pointer  //line:sim:asum:initrsp
+$!gs		irmovq stack, %rsp  	# Set up stack pointer
+$!g		call main		# Execute main program
+$g		call main		# Execute main program //line:sim:asum:callmain
+	halt			# Terminate program 
+
+# Array of 4 elements
+$s		.align 8 	//line:arch:asum:arraystart
+$!s		.align 8
+$!gy	array:
+$!gy		.quad 0x000d000d000d
+$gy	array:	.quad 0x000d000d000d
+	.quad 0x00c000c000c0
+	.quad 0x0b000b000b00
+$s		.quad 0xa000a000a000	//line:arch:asum:arrayend
+$!s		.quad 0xa000a000a000
+
+$!gy	main:
+$s		irmovq array,%rdi	//line:arch:asum:mainstart
+$ao		irmovq array,%rdi
+$gy	main:	irmovq array,%rdi
+	irmovq $4,%rsi
+$!g		call sum		# sum(array, 4)
+$g		call sum		# sum(array, 4) //line:sim:asum:callsum
+$s		ret //line:arch:asum:mainend
+$!s		ret
+
+$!gy	/* $begin sum-ys 0 */
+# long sum(long *start, long count)
+# start in %rdi, count in %rsi
+$!gy	sum:
+$a		irmovq $8,%r8        # Constant 8  #line:arch:asum:const8
+$so		irmovq $8,%r8        # Constant 8
+$gy	sum:	irmovq $8,%r8        # Constant 8
+$a		irmovq $1,%r9	     # Constant 1  #line:arch:asum:const1
+$!a		irmovq $1,%r9	     # Constant 1
+	xorq %rax,%rax	     # sum = 0
+$a		andq %rsi,%rsi	     # Set CC #line:arch:asum:andq
+$!a		andq %rsi,%rsi	     # Set CC
+	jmp     test         # Goto test
+$!gy	loop:       
+$a		mrmovq (%rdi),%r10   # Get *start #line:arch:asum:mrmovq
+$so		mrmovq (%rdi),%r10   # Get *start
+$y	loop:	mrmovq (%rdi),%r10   # Get *start
+$g	loop:	mrmovq (%rdi),%r10   # Get *start //line:sim:asum:loopstart
+$a		addq %r10,%rax       # Add to sum #line:arch:asum:addq
+$g		addq %r10,%rax       # Add to sum //line:sim:asum:addq
+$!ag		addq %r10,%rax       # Add to sum
+$!g		addq %r8,%rdi        # start++
+$g		addq %r8,%rdi        # start++   //line:sim:asum:addq2
+$a		subq %r9,%rsi        # count--.  Set CC #line:arch:asum:subq
+$g		subq %r9,%rsi        # count--.  Set CC //line:sim:asum:subq
+$!ag		subq %r9,%rsi        # count--.  Set CC
+$!gy	test:
+$!gy		jne    loop          # Stop when 0
+$y	test:	jne    loop          # Stop when 0
+$g	test:	jne    loop          # Stop when 0 #//line:sim:asum:loopend
+	ret                  # Return
+$!y	/* $end sum-ys 0 */
+
+# Stack starts here and grows to lower addresses
+$s		.pos 0x200		//line:arch:asum:pos200
+$!s		.pos 0x200
+$s	stack:	 //line:arch:asum:stack
+$!s	stack:
+$g	/* $end code-yssim */
+$!gy	/* $end code-ysa */
+$!gy	/* $end code-yso */

@@ -1,0 +1,44 @@
+\begin{alltt}
+{\scriptsize   1} ##################################################################
+{\scriptsize   2} # ncopy.ys - Copy a src block of len words to dst.
+{\scriptsize   3} # Return the number of positive words (>0) contained in src.
+{\scriptsize   4} #
+{\scriptsize   5} # Include your name and ID here.
+{\scriptsize   6} #
+{\scriptsize   7} # Describe how and why you modified the baseline code.
+{\scriptsize   8} #
+{\scriptsize   9} ##################################################################
+{\scriptsize  10} # Do not modify this portion
+{\scriptsize  11} # Function prologue.
+{\scriptsize  12} # %rdi = src, %rsi = dst, %rdx = len
+{\scriptsize  13} ncopy:
+{\scriptsize  14} 
+{\scriptsize  15} ##################################################################
+{\scriptsize  16} # You can modify this portion
+{\scriptsize  17}         # Loop header
+{\scriptsize  18}         xorq %rax,%rax          # count = 0;
+{\scriptsize  19}         andq %rdx,%rdx          # len <= 0?
+{\scriptsize  20}         jle Done                # if so, goto Done:
+{\scriptsize  21} 
+{\scriptsize  22} Loop:   mrmovq (%rdi), %r10     # read val from src...
+{\scriptsize  23}         rmmovq %r10, (%rsi)     # ...and store it to dst
+{\scriptsize  24}         andq %r10, %r10         # val <= 0?
+{\scriptsize  25}         jle Npos                # if so, goto Npos:
+{\scriptsize  26}         irmovq $1, %r10
+{\scriptsize  27}         addq %r10, %rax         # count++
+{\scriptsize  28} Npos:   irmovq $1, %r10
+{\scriptsize  29}         subq %r10, %rdx         # len--
+{\scriptsize  30}         irmovq $8, %r10
+{\scriptsize  31}         addq %r10, %rdi         # src++
+{\scriptsize  32}         addq %r10, %rsi         # dst++
+{\scriptsize  33}         andq %rdx,%rdx          # len > 0?
+{\scriptsize  34}         jg Loop                 # if so, goto Loop:
+{\scriptsize  35} ##################################################################
+{\scriptsize  36} # Do not modify the following section of code
+{\scriptsize  37} # Function epilogue.
+{\scriptsize  38} Done:
+{\scriptsize  39}         ret
+{\scriptsize  40} ##################################################################
+{\scriptsize  41} # Keep the following label at the end of your function
+{\scriptsize  42} End:
+\end{alltt}

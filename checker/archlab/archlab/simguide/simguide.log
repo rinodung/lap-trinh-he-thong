@@ -1,0 +1,257 @@
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2014.3.25)  1 APR 2015 13:50
+entering extended mode
+ %&-line parsing enabled.
+**simguide
+(./simguide.tex
+LaTeX2e <2009/09/24>
+Babel <v3.8l> and hyphenation patterns for english, usenglishmax, dumylang, noh
+yphenation, loaded.
+(/usr/share/texmf-texlive/tex/latex/base/article.cls
+Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
+(/usr/share/texmf-texlive/tex/latex/base/size11.clo
+File: size11.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/usr/share/texmf-texlive/tex/latex/psnfss/times.sty
+Package: times 2005/04/12 PSNFSS-v9.2a (SPQR) 
+)
+(/usr/share/texmf-texlive/tex/latex/base/alltt.sty
+Package: alltt 1997/06/16 v2.0g defines alltt environment
+)
+(/usr/share/texmf-texlive/tex/latex/graphics/graphicx.sty
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texmf-texlive/tex/latex/graphics/keyval.sty
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks14
+)
+(/usr/share/texmf-texlive/tex/latex/graphics/graphics.sty
+Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texmf-texlive/tex/latex/graphics/trig.sty
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+(/etc/texmf/tex/latex/config/graphics.cfg
+File: graphics.cfg 2009/08/28 v1.8 graphics configuration of TeX Live
+)
+Package graphics Info: Driver file: pdftex.def on input line 91.
+
+(/usr/share/texmf-texlive/tex/latex/pdftex-def/pdftex.def
+File: pdftex.def 2010/03/12 v0.04p Graphics/color for pdfTeX
+\Gread@gobject=\count87
+))
+\Gin@req@height=\dimen103
+\Gin@req@width=\dimen104
+)
+(/usr/share/texmf-texlive/tex/latex/graphics/color.sty
+Package: color 2005/11/14 v1.0j Standard LaTeX Color (DPC)
+
+(/etc/texmf/tex/latex/config/color.cfg
+File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
+)
+Package color Info: Driver file: pdftex.def on input line 130.
+) (../../../../decls-handout.tex
+\c@prob=\count88
+)
+(../../../../decls-common.tex
+\c@codelineno=\count89
+) (../../../../data/data-defs.tex)
+(../../../../asm/asm-defs.tex) (../../../../arch/arch-defs.tex)
+(../../../../data/labels.aux) (./simguide.aux)
+\openout1 = `simguide.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Try loading font information for OT1+ptm on input line 19.
+
+(/usr/share/texmf-texlive/tex/latex/psnfss/ot1ptm.fd
+File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
+)
+(/usr/share/texmf-texlive/tex/context/base/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count90
+\scratchdimen=\dimen105
+\scratchbox=\box26
+\nofMPsegments=\count91
+\nofMParguments=\count92
+\everyMPshowfont=\toks15
+\MPscratchCnt=\count93
+\MPscratchDim=\dimen106
+\MPnumerator=\count94
+\everyMPtoPDFconversion=\toks16
+)
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <17.28> on input line 31.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <12> on input line 31.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 31.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 31.
+
+
+pdfTeX warning: pdflatex (file ../../../../arch/pipe-full.pdf): PDF inclusion: 
+found PDF version <1.5>, but at most version <1.4> allowed
+<../../../../arch/pipe-full.pdf, id=1, 646.00368pt x 918.85887pt>
+File: ../../../../arch/pipe-full.pdf Graphic file (type pdf)
+
+<use ../../../../arch/pipe-full.pdf>
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <9> on input line 31.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 31.
+LaTeX Font Info:    Try loading font information for OMS+ptm on input line 31.
+
+(/usr/share/texmf-texlive/tex/latex/psnfss/omsptm.fd
+File: omsptm.fd 
+)
+LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <9> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 31.
+ [1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <../../../../arch/pipe-full
+.pdf>]
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <14.4> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 42.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 45.
+
+(/usr/share/texmf-texlive/tex/latex/psnfss/ot1pcr.fd
+File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
+)
+LaTeX Font Info:    Font shape `OT1/pcr/m/it' in size <10> not available
+(Font)              Font shape `OT1/pcr/m/sl' tried instead on input line 52.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 68.
+LaTeX Font Info:    Font shape `OT1/pcr/bx/n' in size <10.95> not available
+(Font)              Font shape `OT1/pcr/b/n' tried instead on input line 68.
+ (./code-yssim.tex
+Overfull \hbox (24.20001pt too wide) in paragraph at lines 4--4
+[] []  \OT1/pcr/m/n/8 3[] \OT1/pcr/m/n/10 0x000: 30f40002000000000000 |   irmov
+q stack, %rsp      # Set up stack pointer[][] 
+ []
+
+
+Overfull \hbox (24.20001pt too wide) in paragraph at lines 5--5
+[] []  \OT1/pcr/m/n/8 4[] \OT1/pcr/m/n/10 0x00a: 803800000000000000   |   call 
+main               # Execute main program[][] 
+ []
+
+
+Overfull \hbox (6.20001pt too wide) in paragraph at lines 6--6
+[] []  \OT1/pcr/m/n/8 5[] \OT1/pcr/m/n/10 0x013: 00                   |   halt 
+                   # Terminate program[] 
+ []
+
+
+Overfull \hbox (12.20001pt too wide) in paragraph at lines 31--31
+[] [] \OT1/pcr/m/n/8 30[] \OT1/pcr/m/n/10 0x087: 747700000000000000   | test:  
+   jne    loop          # Stop when 0 #[][] 
+ []
+
+
+Overfull \hbox (24.20001pt too wide) in paragraph at lines 34--34
+[] [] \OT1/pcr/m/n/8 33[]                             \OT1/pcr/m/n/10 | # Stack
+ starts here and grows to lower addresses[] 
+ []
+
+)
+LaTeX Font Info:    Try loading font information for OT1+phv on input line 114.
+
+ (/usr/share/texmf-texlive/tex/latex/psnfss/ot1phv.fd
+File: ot1phv.fd 2001/06/04 scalable font definitions for OT1/phv.
+)
+LaTeX Font Info:    Font shape `OT1/phv/bx/n' in size <10> not available
+(Font)              Font shape `OT1/phv/b/n' tried instead on input line 114.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/sc' in size <10.95> not available
+(Font)              Font shape `OT1/ptm/b/sc' tried instead on input line 124.
+ [2] [3]
+LaTeX Font Info:    Font shape `OT1/pcr/m/it' in size <10.95> not available
+(Font)              Font shape `OT1/pcr/m/sl' tried instead on input line 171.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 176.
+ [4]
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <10.95> on input line 196.
+
+<seq-cntl.pdf, id=74, 511.5867pt x 529.98203pt>
+File: seq-cntl.pdf Graphic file (type pdf)
+ <use seq-cntl.pdf>
+<seq-code.pdf, id=76, 514.4043pt x 372.60506pt>
+File: seq-code.pdf Graphic file (type pdf)
+ <use seq-code.pdf>
+<seq-mem.pdf, id=78, 268.25218pt x 119.7002pt>
+File: seq-mem.pdf Graphic file (type pdf)
+ <use seq-mem.pdf> [5] [6 <./seq-cntl.pdf>] [7 <./seq-code.pdf> <./seq-mem.pdf>
+] [8]
+<pipe-cntl.pdf, id=162, 511.58627pt x 594.8068pt>
+File: pipe-cntl.pdf Graphic file (type pdf)
+ <use pipe-cntl.pdf>
+
+LaTeX Warning: Float too large for page by 20.77592pt on input line 380.
+
+<pipe-register.pdf, id=164, 520.54326pt x 57.70157pt>
+File: pipe-register.pdf Graphic file (type pdf)
+ <use pipe-register.pdf>
+<pipe-code.pdf, id=166, 501.51335pt x 367.69472pt>
+File: pipe-code.pdf Graphic file (type pdf)
+ <use pipe-code.pdf> [9]
+[10 <./pipe-cntl.pdf>] [11 <./pipe-register.pdf> <./pipe-code.pdf>]
+LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <10.95> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 491.
+
+Overfull \hbox (9.0289pt too wide) in paragraph at lines 491--496
+[]\OT1/ptm/m/it/10.95 Get fa-mil-iar with the sim-u-la-tor op-er-a-tion. \OT1/p
+tm/m/n/10.95 Try run-ning some of the ex-am-ple pro-grams in the \OT1/pcr/m/n/1
+0.95 y86-code
+ []
+
+LaTeX Font Info:    Font shape `OT1/phv/bx/n' in size <10.95> not available
+(Font)              Font shape `OT1/phv/b/n' tried instead on input line 506.
+[12] [13] (./simguide.aux) ) 
+Here is how much of TeX's memory you used:
+ 1585 strings out of 495061
+ 19302 string characters out of 1182621
+ 82048 words of memory out of 3000000
+ 4724 multiletter control sequences out of 15000+50000
+ 37111 words of font info for 75 fonts, out of 3000000 for 9000
+ 28 hyphenation exceptions out of 8191
+ 30i,7n,21p,277b,320s stack positions out of 5000i,500n,10000p,200000b,50000s
+{/usr/share/texmf-texlive/fonts/enc/dvips/base/8r.e
+nc}</usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/sh
+are/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-te
+xlive/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts
+/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texmf-texlive/fonts/type1/publi
+c/amsfonts/cm/cmsy9.pfb></usr/share/texmf-texlive/fonts/type1/urw/courier/ucrb8
+a.pfb></usr/share/texmf-texlive/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/
+texmf-texlive/fonts/type1/urw/courier/ucrro8a.pfb></usr/share/texmf-texlive/fon
+ts/type1/urw/helvetic/uhvb8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/helv
+etic/uhvr8a.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></us
+r/share/texmf-texlive/fonts/type1/urw/times/utmr8a.pfb></usr/share/texmf-texliv
+e/fonts/type1/urw/times/utmri8a.pfb>
+Output written on simguide.pdf (13 pages, 584325 bytes).
+PDF statistics:
+ 304 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 500000)
+ 78 words of extra memory for PDF output out of 10000 (max. 10000000)
+

@@ -1,0 +1,33 @@
+This directory contains files to generate the HCL code for three processors:
+SEQ, SEQ+, and PIPE.
+
+The different versions of the HCL files are extracted from two
+different master files: master-pipe.hcl and master-seq.hcl.  The Perl
+script vextract.pl does the extraction.
+
+The different HCL files are as follows:
+
+seq-std.hcl		Standard version of SEQ
+seq-std-annotate.hcl    Standard version + annotations for code extraction
+seq-nocmov-annotate.hcl	Version without conditional moves implemented
+seq-full.hcl		Assignment to implement iaddq instruction
+seq-full-ans.hcl	Implements iaddq instruction
+seq+-std.hcl		Standard version of SEQ+
+seq+-std-annotate.hcl	Standard version of SEQ+ with annotations
+
+pipe-std.hcl		Standard version of PIPE
+pipe-std-annotate.hcl	PIPE with annotations for code extraction
+pipe-full.hcl		Assignment to implement iaddq
+pipe-full-ans.hcl	Solution with iaddq
+pipe-lf.hcl		Assignment to implement load forwarding
+pipe-lf-ans.hcl		Solution with load forwarding
+pipe-nobypass.hcl	Assignment to implement PIPE-
+pipe-nobypass-annotate.hcl	Assignment with annotations
+pipe-nobypass-ans.hcl	Solution to implement PIPE- 
+pipe-nt.hcl		Assignment to implement NT branch pred.
+pipe-nt-ans.hcl		Solution to implement NT branch.
+pipe-btfnt.hcl		Assignment to implement BTFNT branch pred.
+pipe-btfnt-ans.hcl	Solution to implement BTFNT branch pred.
+pipe-1w.hcl		Assignment to implement single write port
+pipe-1w-annotate.hcl	Assignment to implement single write port with ann.
+pipe-1w-ans.hcl		Solution to implement single write port

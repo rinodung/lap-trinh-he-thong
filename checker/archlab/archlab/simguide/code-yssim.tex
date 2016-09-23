@@ -1,0 +1,37 @@
+\begin{alltt}
+{\scriptsize \textcolor{linenumcolor}{  1}}                             | # Execution begins at address 0
+{\scriptsize \textcolor{linenumcolor}{  2}} 0x000:                      |   .pos 0
+{\scriptsize \textcolor{linenumcolor}{  3}} 0x000: 30f40002000000000000 |   irmovq stack, %rsp      # Set up stack pointer\setcounter{codelineno}{2}\refstepcounter{codelineno}\label{line:sim:asum:initrsp}
+{\scriptsize \textcolor{linenumcolor}{  4}} 0x00a: 803800000000000000   |   call main               # Execute main program\setcounter{codelineno}{3}\refstepcounter{codelineno}\label{line:sim:asum:callmain}
+{\scriptsize \textcolor{linenumcolor}{  5}} 0x013: 00                   |   halt                    # Terminate program
+{\scriptsize \textcolor{linenumcolor}{  6}}                             |
+{\scriptsize \textcolor{linenumcolor}{  7}}                             | # Array of 4 elements
+{\scriptsize \textcolor{linenumcolor}{  8}} 0x018:                      |   .align 8
+{\scriptsize \textcolor{linenumcolor}{  9}} 0x018: 0d000d000d000000     | array:    .quad 0x000d000d000d
+{\scriptsize \textcolor{linenumcolor}{ 10}} 0x020: c000c000c0000000     |   .quad 0x00c000c000c0
+{\scriptsize \textcolor{linenumcolor}{ 11}} 0x028: 000b000b000b0000     |   .quad 0x0b000b000b00
+{\scriptsize \textcolor{linenumcolor}{ 12}} 0x030: 00a000a000a00000     |   .quad 0xa000a000a000
+{\scriptsize \textcolor{linenumcolor}{ 13}}                             |
+{\scriptsize \textcolor{linenumcolor}{ 14}} 0x038: 30f71800000000000000 | main:     irmovq array,%rdi
+{\scriptsize \textcolor{linenumcolor}{ 15}} 0x042: 30f60400000000000000 |   irmovq $4,%rsi
+{\scriptsize \textcolor{linenumcolor}{ 16}} 0x04c: 805600000000000000   |   call sum                # sum(array, 4)\setcounter{codelineno}{15}\refstepcounter{codelineno}\label{line:sim:asum:callsum}
+{\scriptsize \textcolor{linenumcolor}{ 17}} 0x055: 90                   |   ret
+{\scriptsize \textcolor{linenumcolor}{ 18}}                             |
+{\scriptsize \textcolor{linenumcolor}{ 19}}                             | # long sum(long *start, long count)
+{\scriptsize \textcolor{linenumcolor}{ 20}}                             | # start in %rdi, count in %rsi
+{\scriptsize \textcolor{linenumcolor}{ 21}} 0x056: 30f80800000000000000 | sum:      irmovq $8,%r8        # Constant 8
+{\scriptsize \textcolor{linenumcolor}{ 22}} 0x060: 30f90100000000000000 |   irmovq $1,%r9        # Constant 1
+{\scriptsize \textcolor{linenumcolor}{ 23}} 0x06a: 6300                 |   xorq %rax,%rax       # sum = 0
+{\scriptsize \textcolor{linenumcolor}{ 24}} 0x06c: 6266                 |   andq %rsi,%rsi       # Set CC
+{\scriptsize \textcolor{linenumcolor}{ 25}} 0x06e: 708700000000000000   |   jmp     test         # Goto test
+{\scriptsize \textcolor{linenumcolor}{ 26}} 0x077: 50a70000000000000000 | loop:     mrmovq (%rdi),%r10   # Get *start\setcounter{codelineno}{25}\refstepcounter{codelineno}\label{line:sim:asum:loopstart}
+{\scriptsize \textcolor{linenumcolor}{ 27}} 0x081: 60a0                 |   addq %r10,%rax       # Add to sum\setcounter{codelineno}{26}\refstepcounter{codelineno}\label{line:sim:asum:addq}
+{\scriptsize \textcolor{linenumcolor}{ 28}} 0x083: 6087                 |   addq %r8,%rdi        # start++\setcounter{codelineno}{27}\refstepcounter{codelineno}\label{line:sim:asum:addq2}
+{\scriptsize \textcolor{linenumcolor}{ 29}} 0x085: 6196                 |   subq %r9,%rsi        # count--.  Set CC\setcounter{codelineno}{28}\refstepcounter{codelineno}\label{line:sim:asum:subq}
+{\scriptsize \textcolor{linenumcolor}{ 30}} 0x087: 747700000000000000   | test:     jne    loop          # Stop when 0 #\setcounter{codelineno}{29}\refstepcounter{codelineno}\label{line:sim:asum:loopend}
+{\scriptsize \textcolor{linenumcolor}{ 31}} 0x090: 90                   |   ret                  # Return
+{\scriptsize \textcolor{linenumcolor}{ 32}}                             |
+{\scriptsize \textcolor{linenumcolor}{ 33}}                             | # Stack starts here and grows to lower addresses
+{\scriptsize \textcolor{linenumcolor}{ 34}} 0x200:                      |   .pos 0x200
+{\scriptsize \textcolor{linenumcolor}{ 35}} 0x200:                      | stack:
+\end{alltt}

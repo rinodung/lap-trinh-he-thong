@@ -1,0 +1,656 @@
+\documentclass[11pt]{article}
+
+%% Comment command
+\newcommand{\comment}[1]{}
+
+%% Two part captions.  First part is title.  Second is explanation.
+\newcommand{\mycaption}[2]{\caption[#1]{\small \textsf{\textbf{#1} #2}}}
+
+%% tty - for displaying TTY input and output
+\newenvironment{tty}%
+{\small\begin{alltt}}%
+{\end{alltt}}
+
+%% ccode- for displaying formatted C code (c2tex) 
+\newenvironment{ccode}%
+{\small}%
+{}
+
+%% codefrag - for displaying unformatted code fragments
+\newenvironment{codefrag}%
+{\small\begin{alltt}}%
+{\end{alltt}%
+}
+
+\usepackage{times}
+\usepackage{alltt}
+
+%% Page layout
+\oddsidemargin 0pt
+\evensidemargin 0pt
+\textheight 600pt
+\textwidth 469pt
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1ex}
+
+
+\begin{document}
+
+\title{CS 349, Summer 2015\\
+Optimizing the Performance of a Pipelined Processor\\
+Assigned: June~6, Due: June~21, 11:59PM}
+
+\author{}
+\date{}
+
+\maketitle
+
+Harry Bovik ({\tt bovik@cs.cmu.edu}) is the lead person for this
+assignment.
+
+\section{Introduction}
+
+In this lab, you will learn about the design and implementation of a
+pipelined Y86-64 processor, optimizing both it and a benchmark
+program to maximize performance.
+You are allowed to make any semantics-preserving
+transformation to the benchmark program, or to make enhancements to
+the pipelined processor, or both. When you have completed the lab, you
+will have a keen appreciation for the interactions between code and
+hardware that affect the performance of your programs.
+
+The lab is organized into three parts, each with its own handin.  In
+Part A you will write some simple Y86-64 programs and become familiar
+with the Y86-64 tools. In Part B, you will extend the SEQ simulator with
+a new instruction. These two parts will prepare you for Part C, the
+heart of the lab, where you will optimize the Y86-64 benchmark program and
+the processor design.
+
+\section{Logistics}
+
+You will work on this lab alone.  
+
+Any clarifications and revisions to the assignment will be posted on
+the course Web page.
+
+\section{Handout Instructions}
+
+\begin{quote}
+\bf SITE-SPECIFIC: Insert a paragraph here that explains how students
+should download the \texttt{archlab-handout.tar} file.
+\end{quote}
+
+\begin{enumerate}
+\item Start by copying the file {\tt archlab-handout.tar}
+to a (protected) directory in which you plan to do your work.
+
+\item Then give the command: \verb@tar xvf archlab-handout.tar@.  This will
+cause the following files to be unpacked into the directory: {\tt
+README}, {\tt Makefile}, {\tt sim.tar}, {\tt
+archlab.pdf}, and {\tt simguide.pdf}.  
+
+\item Next, give the command \verb@tar xvf sim.tar@. This will create the
+directory {\tt sim}, which contains your personal copy of the Y86-64
+tools. You will be doing all of your work inside this directory.
+
+\item Finally, change to the {\tt sim} directory and build the
+Y86-64 tools:
+\begin{tty}
+unix> {\em cd sim}
+unix> {\em make clean; make}
+\end{tty}
+\end{enumerate}
+
+
+\section{Part A}
+
+You will be working in directory \texttt{sim/misc} in this part.
+
+Your task is to write and simulate the following three Y86-64
+programs.  The required behavior of these programs is defined by the
+example C functions in \texttt{examples.c}. Be sure to put your name
+and ID in a comment at the beginning of each program.  You can test
+your programs by first assemblying them with the program \textsc{yas}
+and then running them with the instruction set simulator \textsc{yis}.
+
+In all of your Y86-64 functions, you should follow the x86-64 conventions
+for passing function arguments, using registers, and using the stack.
+This includes saving and restoring any callee-save registers that you use.
+
+\subsection*{\texttt{sum.ys}: Iteratively sum linked list elements}
+
+Write a Y86-64 program \texttt{sum.ys} that iteratively sums the
+elements of a linked list. Your program should consist of some code
+that sets up the stack structure, invokes a function, and then halts.
+In this case, the function should be
+Y86-64 code for a function (\texttt{sum\_list}) 
+that is functionally equivalent to the C \texttt{sum\_list} function in
+Figure~\ref{fig:examples}. Test your program using the following
+three-element list:
+
+\begin{codefrag}
+# Sample linked list
+.align 8
+ele1:
+        .quad 0x00a
+        .quad ele2
+ele2:
+        .quad 0x0b0
+        .quad ele3
+ele3:
+        .quad 0xc00
+        .quad 0
+\end{codefrag} 
+
+\begin{figure}
+\begin{ccode}
+\input{examples}
+\end{ccode}
+\mycaption{C versions of the Y86-64 solution functions.}
+{See \texttt{sim/misc/examples.c}}
+\label{fig:examples}
+\end{figure}
+
+\subsection*{\texttt{rsum.ys}: Recursively sum linked list elements}
+
+Write a Y86-64 program 
+\texttt{rsum.ys} that recursively sums the elements of a linked
+list.  This code should be similar to the code in \texttt{sum.ys},
+except that it should use a function \texttt{rsum\_list} that
+recursively sums a list of numbers, as shown with the C function
+\texttt{rsum\_list} in 
+Figure~\ref{fig:examples}.  Test your
+program using the same three-element list you used for testing
+\texttt{list.ys}.
+
+\subsection*{\texttt{copy.ys}: Copy a source block to a destination block}
+
+Write a program (\texttt{copy.ys}) that copies a block of words
+from one part of memory to another (non-overlapping area) area of
+memory, computing the checksum (Xor) of all the words copied.
+
+Your program should consist of code that sets up a stack frame,
+invokes a function \texttt{copy\_block}, and then halts.  The function
+should be functionally equivalent to the C function
+\texttt{copy\_block} shown in Figure
+Figure~\ref{fig:examples}.  Test your
+program using the following three-element source and destination
+blocks:
+
+\begin{codefrag}
+.align 8
+# Source block
+src:
+        .quad 0x00a
+        .quad 0x0b0
+        .quad 0xc00
+
+# Destination block
+dest:
+        .quad 0x111
+        .quad 0x222
+        .quad 0x333
+\end{codefrag}
+
+\section{Part B}
+
+You will be working in directory \texttt{sim/seq} in this part.
+
+Your task in Part B is to extend the SEQ processor to support the \texttt{iaddq}, 
+described in Homework problems 4.51 and 4.52.
+To add this instructions, you will modify the file
+\texttt{seq-full.hcl},
+which implements the version of SEQ described in the CS:APP3e textbook.
+In addition, it contains declarations of some constants that you will
+need for your solution.
+
+Your HCL file must begin with a header comment containing
+the following information:
+\begin{itemize}
+\item Your name and ID.
+\item A description of the computations required for the \texttt{iaddq}
+instruction. Use the descriptions of \texttt{irmovq} and {\tt OPq} 
+in Figure 4.18 in the CS:APP3e text as a guide.
+\end{itemize}
+
+\subsection*{Building and Testing Your Solution}
+
+Once you have finished modifying the \texttt{seq-full.hcl} file, then
+you will need to build a new instance of the SEQ simulator (\texttt{ssim})
+based on this HCL file, and then test it:
+
+\begin{itemize}
+\item {\em Building a new simulator.} 
+You can use \texttt{make} to build a new SEQ simulator:
+\begin{codefrag}
+unix> {\em make VERSION=full}
+\end{codefrag}
+This builds a version of \texttt{ssim} that uses the control logic you
+specified in \texttt{seq-full.hcl}.  To save typing, you can assign
+\texttt{VERSION=full} in the Makefile. 
+
+\item {\em Testing your solution on a simple Y86-64 program.}
+For your initial testing, we recommend running simple programs such
+as \texttt{asumi.yo} (testing \texttt{iaddq}) in TTY mode,
+comparing the results against the ISA simulation:
+\begin{tty}
+unix> {\em ./ssim -t ../y86-code/asumi.yo}
+\end{tty}
+If the ISA test fails, then you should debug your implementation by
+single stepping the simulator in GUI mode:
+\begin{tty}
+unix> {\em ./ssim -g ../y86-code/asumi.yo}
+\end{tty}
+
+\item {\em Retesting your solution using the benchmark programs.}
+Once your simulator is able to correctly execute small programs, then
+you can automatically test it on the Y86-64 benchmark programs in {\tt
+../y86-code}:
+\begin{tty}
+unix> {\em (cd ../y86-code; make testssim)}
+\end{tty}
+This will run {\tt ssim} on the benchmark programs and check for
+correctness by comparing the resulting processor state with the state
+from a high-level ISA simulation.
+Note that none of these programs test the added instructions.
+You are simply making sure that your solution did not inject errors
+for the original instructions.
+See file
+\texttt{../y86-code/README} file for more details.
+
+\item {\em Performing regression tests.}
+Once you can execute the benchmark programs correctly, then you should
+run the extensive set of regression tests in {\tt ../ptest}.  To test
+everything except {\tt iaddq} and {\tt leave}:
+\begin{tty}
+unix> {\em (cd ../ptest; make SIM=../seq/ssim)}
+\end{tty}
+To test your implementation of {\tt iaddq}:
+\begin{tty}
+unix> {\em (cd ../ptest; make SIM=../seq/ssim TFLAGS=-i)}
+\end{tty}
+\end{itemize}
+
+For more information on the SEQ simulator refer to the handout
+\textit{CS:APP3e Guide to Y86-64 Processor Simulators} (\texttt{simguide.pdf}).
+
+\section{Part C}
+
+You will be working in directory \texttt{sim/pipe} in this part.
+
+The \texttt{ncopy} function in Figure~\ref{fig:ncopyc} copies a
+\texttt{len}-element integer array \texttt{src} to a non-overlapping
+\texttt{dst}, returning a count of the number of positive integers
+contained in \texttt{src}.
+\begin{figure}
+\begin{ccode}
+\input{ncopy}
+\end{ccode}
+\mycaption{C version of the \texttt{ncopy} function.}{See \texttt{sim/pipe/ncopy.c.}}
+\label{fig:ncopyc}
+\end{figure}
+Figure~\ref{fig:ncopys} shows the baseline Y86-64 version of \texttt{ncopy}. 
+\begin{figure}
+\begin{ccode}
+\input{ncopy-ys}
+\end{ccode}
+\mycaption{Baseline Y86-64 version of the \texttt{ncopy} function.}{See \texttt{sim/pipe/ncopy.ys.}}
+\label{fig:ncopys}
+\end{figure}
+The file \texttt{pipe-full.hcl} contains a copy of the HCL
+code for PIPE, along with a declaration of the constant value \texttt{IIADDQ}.
+
+Your task in Part C is to modify \texttt{ncopy.ys} and
+\texttt{pipe-full.hcl} with the goal of making \texttt{ncopy.ys} run
+as fast as possible.
+
+You will be handing in two files: \texttt{pipe-full.hcl} and 
+\texttt{ncopy.ys}. Each file should begin with a header comment
+with the following information:
+\begin{itemize}
+\item Your name and ID.
+\item A high-level description of your code. In each case, describe
+how and why you modified your code.
+\end{itemize}
+
+\subsection*{Coding Rules}
+
+You are free to make any modifications you wish, with the following
+constraints:
+
+\begin{itemize}
+\item Your \texttt{ncopy.ys} function must work for arbitrary array
+sizes. You might be tempted to hardwire your solution for 64-element
+arrays by simply coding 64 copy instructions, but this would be a bad
+idea because we will be grading your solution based on its performance
+on arbitrary arrays.
+\item Your \texttt{ncopy.ys} function must run correctly with \textsc{yis}.
+By correctly, we mean that it must correctly copy the \texttt{src} block
+{\em and} return (in \texttt{\%rax}) the correct number of positive integers.
+
+\item The assembled version of your \texttt{ncopy} file must not be
+more than 1000 bytes long.  You can check the length of any program
+with the \texttt{ncopy} function embedded using the provided script
+\texttt{check-len.pl}:
+\begin{tty}
+unix> {\em ./check-len.pl < ncopy.yo}
+\end{tty}
+
+\item Your \texttt{pipe-full.hcl} implementation must pass the 
+regression tests in \texttt{../y86-code} and \texttt{../ptest}
+(without the \texttt{-i} flag that tests {\tt iaddq}).
+\end{itemize}
+
+Other than that, you are free to implement the {\tt iaddq} instruction
+if you think that will help.
+You may make any semantics preserving transformations to the {\tt
+ncopy.ys} function, such as reordering instructions, replacing
+groups of instructions with single instructions, deleting some
+instructions, and adding other instructions.  You may find it useful
+to read about loop unrolling in Section 5.8 of CS:APP3e.
+
+\subsection*{Building and Running Your Solution}
+
+In order to test your solution, you will need to build a driver
+program that calls your \texttt{ncopy} function.  We have provided you
+with the \texttt{gen-driver.pl} program that generates a driver
+program for arbitrary sized input arrays. For example, typing
+
+\begin{tty}
+unix> {\em make drivers}
+\end{tty}
+will construct the following two useful driver programs:
+
+\begin{itemize}
+\item \texttt{sdriver.yo}: A {\em small driver program} that tests
+an \texttt{ncopy} function on small arrays with 4 elements.  
+If your solution is correct, then this program will halt with a value
+of 2 in register \texttt{\%rax} after copying the \texttt{src}
+array.
+
+\item \texttt{ldriver.yo}: A {\em large driver program} that tests
+an \texttt{ncopy} function on larger arrays with 63 elements.  If
+your solution is correct, then this program will halt with a value of
+31 (\texttt{0x1f}) in register \texttt{\%rax} after copying the
+\texttt{src} array.
+\end{itemize}
+Each time you modify your \texttt{ncopy.ys} program, you can 
+rebuild the driver programs by typing
+\begin{tty}
+unix> {\em make drivers}
+\end{tty}
+Each time you modify your \texttt{pipe-full.hcl} file, you 
+can rebuild the simulator by typing 
+\begin{tty}
+unix> {\em make psim VERSION=full}
+\end{tty}
+If you want to rebuild the simulator and the driver programs, type
+\begin{tty}
+unix> {\em make VERSION=full}
+\end{tty}
+
+To test your solution in GUI mode on a small 4-element array, type
+\begin{codefrag}
+unix> {\em ./psim -g sdriver.yo}
+\end{codefrag}
+To test your solution on a larger 63-element array, type
+\begin{codefrag}
+unix> {\em ./psim -g ldriver.yo}
+\end{codefrag}
+Once your simulator correctly runs your version of \texttt{ncopy.ys} on 
+these two block lengths,
+you will want to perform the following additional tests:
+\begin{itemize}
+\item {\em Testing your driver files on the ISA simulator.} Make 
+sure that your \texttt{ncopy.ys} function works properly with
+\textsc{yis}:
+\begin{codefrag}
+unix> {\em make drivers}
+unix> {\em ../misc/yis sdriver.yo}
+\end{codefrag}
+
+\item
+{\em Testing your code on a range of block lengths with the ISA
+simulator.}  The Perl script \texttt{correctness.pl} generates driver
+files with block lengths from 0 up to some limit (default 65), plus
+some larger sizes.  It
+simulates them (by default with \textsc{yis}), and checks the results.  It
+generates a report showing the status for each block length:
+\begin{tty}
+unix> {\em ./correctness.pl}
+\end{tty}
+This script generates test programs where the result count varies
+randomly from one run to another, and so it provides a more stringent
+test than the standard drivers.
+
+If you get incorrect results for some length $K$, you can generate a
+driver file for that length that includes checking code, and where the
+result varies randomly:
+\begin{tty}
+unix> {\em ./gen-driver.pl -f ncopy.ys -n \(K\) -rc > driver.ys}
+unix> {\em make driver.yo}
+unix> {\em ../misc/yis driver.yo}
+\end{tty}
+The program will end with register \verb@%rax@ having the following
+value:
+\begin{description}
+\item[\texttt{0xaaaa}]: All tests pass.
+\item[\texttt{0xbbbb}]: Incorrect count
+\item[\texttt{0xcccc}]: Function ncopy is more than 1000 bytes long.
+\item[\texttt{0xdddd}]: Some of the source data was not copied to its
+destination.
+\item[\texttt{0xeeee}]: Some word just before or just after the
+destination region was corrupted.
+\end{description}
+
+\item {\em Testing your pipeline simulator on the benchmark programs.}
+Once your simulator is able to correctly execute \texttt{sdriver.ys}
+and \texttt{ldriver.ys},
+you should test it against the Y86-64 benchmark programs in 
+{\tt ../y86-code}:
+\begin{tty}
+unix> {\em (cd ../y86-code; make testpsim)}
+\end{tty}
+This will run {\tt psim} on the benchmark programs and compare 
+results with \textsc{yis}.
+
+
+\item {\em Testing your pipeline simulator with extensive regression tests.}
+Once you can execute the benchmark programs correctly, then you should
+check it with the regression tests in {\tt ../ptest}. For example,
+if your solution implements the \texttt{iaddq} instruction, then
+\begin{tty}
+unix> {\em (cd ../ptest; make SIM=../pipe/psim TFLAGS=-i)}
+\end{tty}
+
+\item {\em Testing your code on a range of block lengths with the pipeline simulator.}
+Finally, you can run the same code tests on the pipeline simulator that you did earlier with the ISA simulator
+\begin{tty}
+unix> {\em ./correctness.pl -p}
+\end{tty}
+\end{itemize}
+\section{Evaluation}
+
+
+The lab is worth 190 points: 30 points for Part A, 60 points for Part B,
+and 100 points for Part C.
+
+\subsection*{Part A}
+Part A is worth 30 points, 10 points for each Y86-64 solution
+program. Each solution program will be evaluated for correctness,
+including proper handling of the stack and registers,
+as well as functional equivalence with the example C functions in
+\texttt{examples.c}.
+
+The programs \texttt{sum.ys} and \texttt{rsum.ys} will be considered correct
+if the graders do not spot any errors in them, and their respective \texttt{sum\_list} and \texttt{rsum\_list} 
+functions return the sum \texttt{0xcba} in register \texttt{\%rax}.
+
+
+The program \texttt{copy.ys} will be considered correct if 
+the graders do not spot any errors in them, 
+and the
+\texttt{copy\_block} 
+function returns the sum \texttt{0xcba} in register \texttt{\%rax},
+copies the three 64-bit values \texttt{0x00a}, \texttt{0x0b}, and
+\texttt{0xc} to the 24 bytes
+beginning at 
+address {\tt dest}, and does not corrupt other memory locations.
+
+\subsection*{Part B}
+
+This part of the lab is worth 35 points: 
+\begin{itemize}
+\item 10 points for your description of the computations required 
+for the {\tt iaddq} instruction.
+\item 10 points for passing the benchmark regression tests in
+\texttt{y86-code}, to verify that your simulator still correctly
+executes the benchmark suite.
+\item 15 points for passing the regression tests in {\tt ptest} 
+for {\tt iaddq}.
+\end{itemize}
+
+\subsection*{Part C}
+This part of the Lab is worth 100 points: 
+{\bf You will not receive any credit if either your code 
+for {\tt ncopy.ys} or your 
+modified simulator fails any of the tests described earlier.}
+\begin{itemize}
+\item 20 points each for 
+your descriptions in the headers of \texttt{ncopy.ys} and 
+\texttt{pipe-full.hcl} and the quality of these implementations.
+
+\item 60 points for performance. To receive credit here, your
+solution must be correct, as defined earlier. That is, \texttt{ncopy}
+runs correctly with \textsc{yis}, and \texttt{pipe-full.hcl} passes
+all tests in {\tt y86-code} and \texttt{ptest}.
+
+We will express the performance of your function in units of {\em
+cycles per element} (CPE).  That is, if the simulated code requires
+$C$ cycles to copy a block of $N$ elements, then the CPE is $C/N$.
+The PIPE simulator displays the total number of cycles required to
+complete the program.  The baseline version of the
+\texttt{ncopy} function running on the standard PIPE simulator with a
+large 63-element array requires 897 cycles to copy 63 elements, for a
+CPE of $897/63 = 14.24$.
+
+Since some cycles are used to set up the call to \texttt{ncopy} and to
+set up the loop within \texttt{ncopy}, you will find that you will get
+different values of the CPE for different block lengths (generally the
+CPE will drop as $N$ increases).  We will therefore evaluate the
+performance of your function by computing the average of the CPEs for
+blocks ranging from 1 to 64 elements.  You can use the Perl script
+\texttt{benchmark.pl} in the {\tt pipe} directory
+to run simulations of your {\tt ncopy.ys}
+code over a range of block lengths and compute the average CPE\@.
+Simply run the command
+\begin{codefrag}
+unix> {\em ./benchmark.pl}
+\end{codefrag}
+to see what happens.  For example, the baseline version of the
+\texttt{ncopy} function has CPE values ranging between $29.00$ and
+$14.27$, with an average of $15.18$.  Note that this Perl script does
+not check for the correctness of the answer.  Use the script
+\texttt{correctness.pl} for this. 
+
+You should be able to achieve an average CPE of less than $9.00$.
+Our best version averages $7.48$.
+If your average CPE is $c$, then your score $S$ for this portion of the
+lab will be:
+\begin{eqnarray*}
+S & = & \left \{ \begin{array}{ll}
+0\,, &  c > 10.5 \\
+20 \cdot (10.5 - c)\,, & 7.50 \leq c \leq 10.50 \\
+60\,, &  c < 7.50 \\
+\end{array}
+\right .
+\end{eqnarray*}
+
+By default, {\tt benchmark.pl} and {\tt correctness.pl} compile and
+test {\tt ncopy.ys}. Use the {\tt -f} argument to specify a different
+file name.  The {\tt -h} flag gives a complete list of the command
+line arguments.
+
+\end{itemize}
+
+
+\section{Handin Instructions}
+
+\begin{quote}
+\bf SITE-SPECIFIC: Insert a description that explains how students
+should hand in the three parts of the lab.  Here is the description
+we use at CMU.
+\end{quote}
+
+\begin{itemize}
+\item You will be handing in three sets of files:
+\begin{itemize}
+\item Part A: \texttt{sum.ys}, \texttt{rsum.ys}, and \texttt{copy.ys}. 
+\item Part B: \texttt{seq-full.hcl}.
+\item Part C: \texttt{ncopy.ys} and \texttt{pipe-full.hcl}.
+\end{itemize}
+
+\item Make sure you have included your name and ID in a comment at
+the top of each of your handin files.
+
+\item To handin your files for part X, go to your \texttt{archlab-handout}
+directory and type:
+\begin{tty}
+    unix> {\em make handin-partX TEAM=teamname}
+\end{tty}
+where \texttt{X} is \texttt{a}, \texttt{b}, or \texttt{c}, and where
+\texttt{teamname} is your  ID. For example, to handin Part A:
+\begin{tty}
+    unix> {\em make handin-parta TEAM=teamname}
+\end{tty}
+
+
+\item After the handin, if you discover a mistake and want to
+submit a revised copy, type
+\begin{tty}
+    unix {\em make handin-partX TEAM=teamname VERSION=2}
+\end{tty}
+Keep incrementing the version number with each submission.
+
+\item You can verify your handin by looking in 
+\begin{codefrag}
+    CLASSDIR/archlab/handin-partX
+\end{codefrag}
+You have list and insert permissions in this directory, but no
+read or write permissions.
+\end{itemize}
+
+
+\section{Hints}
+
+\begin{itemize}
+
+\item By design, both \texttt{sdriver.yo} and \texttt{ldriver.yo}
+are small enough to debug with in GUI mode. We find it
+easiest to debug in GUI mode, and suggest that you use it.
+
+\item If you running in GUI mode on a Unix server, make sure
+that you have initialized the DISPLAY environment variable:
+\begin{tty}
+    unix> {\em setenv DISPLAY myhost.edu:0}
+\end{tty}
+
+\item With some X servers, the ``Program Code'' window begins life
+as a closed icon when you run \texttt{psim} or \texttt{ssim} 
+in GUI mode. Simply click on the icon to expand the window.
+
+\item With some Microsoft 
+Windows-based X servers, the ``Memory Contents'' window
+will not automatically resize itself. You'll need to resize the window
+by hand.
+
+\item The \texttt{psim} and \texttt{ssim} simulators 
+terminate with a segmentation fault if you ask them to execute a file
+that is not a valid Y86-64 object file.
+
+\end{itemize}
+
+\end{document}
+
+
+

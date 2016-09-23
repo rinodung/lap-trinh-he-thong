@@ -1,0 +1,785 @@
+\documentclass[11pt]{article}
+
+\usepackage{times}
+\usepackage{alltt}
+\usepackage{graphicx}
+\usepackage{url}
+
+\bibliographystyle{plain}
+
+\newcommand{\reg}[1]{\textrm{\texttt{\%#1}}}
+\newcommand{\xmmreg}[1]{\reg{xmm{}#1}}
+\newcommand{\ymmreg}[1]{\reg{ymm{}#1}}
+
+\newcommand{\eaxreg}{\reg{eax}}
+\newcommand{\ebxreg}{\reg{ebx}}
+\newcommand{\ecxreg}{\reg{ecx}}
+\newcommand{\edxreg}{\reg{edx}}
+\newcommand{\esireg}{\reg{esi}}
+\newcommand{\edireg}{\reg{edi}}
+\newcommand{\espreg}{\reg{esp}}
+\newcommand{\ebpreg}{\reg{ebp}}
+\newcommand{\eipreg}{\reg{eip}}
+
+\newcommand{\raxreg}{\reg{rax}}
+\newcommand{\rbxreg}{\reg{rbx}}
+\newcommand{\rcxreg}{\reg{rcx}}
+\newcommand{\rdxreg}{\reg{rdx}}
+\newcommand{\rsireg}{\reg{rsi}}
+\newcommand{\rdireg}{\reg{rdi}}
+\newcommand{\rspreg}{\reg{rsp}}
+\newcommand{\rbpreg}{\reg{rbp}}
+
+
+%% Page layout
+\oddsidemargin 0pt
+\evensidemargin 0pt
+\textheight 600pt
+\textwidth 469pt
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1ex}
+
+%% ccode environment- for displaying formatted C code (c2tex) 
+\newenvironment{ccode}%
+{\small}%
+{}
+
+%% tty - for displaying TTY input and output
+\newenvironment{tty}%
+{\small\begin{alltt}}%
+{\end{alltt}}
+
+
+
+
+\begin{document}
+
+\title{15-213, Fall 20xx\\
+The Attack Lab: Understanding Buffer Overflow Bugs\\
+Assigned: Tue, Sept.~29\\
+{\bf Due: Thu, Oct.~8, 11:59PM EDT}\\
+Last Possible Time to Turn in: Sun, Oct.~11, 11:59PM EDT
+}
+
+\author{}
+\date{}
+
+\maketitle
+
+\section{Introduction}
+
+This assignment involves generating a total of five attacks on two
+programs having different security vulnerabilities.
+Outcomes you will gain from this lab include:
+\begin{itemize}
+\item You will learn different ways that attackers can exploit
+  security vulnerabilities when programs do not safeguard themselves
+  well enough against buffer overflows.
+\item Through this, you will get a better understanding of how to write
+  programs that are more secure, as well as some of the features
+  provided by compilers and operating systems to make programs less
+  vulnerable.
+\item You will gain a deeper understanding of the stack and
+  parameter-passing mechanisms of x86-64 machine code.
+\item You will gain a deeper understanding of how x86-64 instructions
+  are encoded.
+\item You will gain more experience with debugging tools such as \textsc{gdb}
+  and \textsc{objdump}.
+\end{itemize}
+
+{\bf Note:} In this lab, you will gain firsthand experience with
+methods used to exploit security weaknesses in operating systems and
+network servers.  Our purpose is to help you learn about the runtime
+operation of programs and to understand the nature of these security
+weaknesses so that you can avoid them when you write system code.  We do
+not condone the use of any other form of attack to gain
+unauthorized access to any system resources.
+
+You will want to study Sections 3.10.3 and 3.10.4 of the CS:APP3e book
+as reference material for this lab.
+
+\section{Logistics}
+
+As usual, this is an individual project.  You will generate attacks
+for target programs that are custom generated for you.  
+
+\subsection{Getting Files}
+
+You can obtain your files by pointing your Web browser at:
+
+\begin{verbatim}
+    http://$Attacklab::SERVER_NAME:15513/
+\end{verbatim}
+
+\begin{verbatim}
+INSTRUCTOR: $Attacklab::SERVER_NAME is the machine that runs the
+ attacklab servers. You define it in attacklab/Attacklab.pm and in
+ attacklab/src/build/driverhdrs.h
+\end{verbatim}
+
+The server will build your files and return them to your browser in a
+\texttt{tar} file called \texttt{target}$k$\texttt{.tar}, where $k$ is the unique
+number of your target programs.
+
+{\bf Note:} It takes a few seconds to build and download your target, so please be patient. 
+
+Save the \texttt{target}$k$\texttt{.tar} file in a (protected) Linux
+directory in which you plan to do your work.  Then give the command:
+\texttt{tar~-xvf target}$k$\texttt{.tar}.  This will extract a
+directory {\tt target}$k$ containing the files described below.
+
+You should only download one set of files. If for some reason you download multiple
+targets, choose one target to work on and delete the rest.
+
+{\bf Warning:} If you expand your \texttt{target}$k$\texttt{.tar} on a
+PC, by using a utility such as Winzip, or letting your browser do the
+extraction, you'll risk resetting permission bits on the executable
+files.  
+
+The files in {\tt target}$k$ include:
+\begin{description}
+\item{\tt README.txt}: A file describing the contents of the directory
+\item{\tt ctarget}: An executable program vulnerable to {\em code-injection}
+  attacks
+\item{\tt rtarget}: An executable program vulnerable to {\em
+  return-oriented-programming} attacks
+\item{\tt cookie.txt}: An 8-digit hex code that you will use as a
+  unique identifier in your attacks.
+\item {\tt farm.c}: The source code of your target's ``gadget farm,''
+which you will use in generating return-oriented programming attacks.
+\item {\tt hex2raw}: A utility to generate attack strings.
+\end{description}
+
+In the following instructions, we will assume that you have copied the
+files to a protected local directory, and that you are
+executing the programs in that local directory.
+
+\subsection{Important Points}
+
+Here is a summary of some important rules regarding valid solutions
+for this lab.  These points will not make much sense when you read
+this document for the first time.  They are presented here as a
+central reference of rules once you get started.
+
+\begin{itemize}
+\item
+You must do the assignment on a machine that is similar to the one that generated 
+your targets. 
+
+\item Your solutions may not use attacks to circumvent the validation
+  code in the programs.  Specifically, any address you incorporate
+  into an attack string for use by a {\tt ret} instruction should be
+  to one of the following destinations:
+\begin{itemize}
+\item The addresses for functions {\tt touch1}, {\tt touch2}, or {\tt touch3}.
+
+\item The address of your injected code
+
+\item The address of one of your gadgets from the gadget farm.
+\end{itemize}
+
+\item You may only construct gadgets from file {\tt rtarget} with
+  addresses ranging between those for functions \verb@start_farm@ and
+  \verb@end_farm@.
+
+\end{itemize}
+
+\section{Target Programs}
+
+Both {\sc ctarget} and {\sc rtarget}
+read strings from standard input. They do so
+with the function {\tt getbuf} defined below:
+
+\begin{ccode}
+\input{getbuf-c}
+\end{ccode}
+
+The function {\tt Gets} is similar to the standard library function
+{\tt gets}---it reads a string from standard input (terminated by
+`\verb@\n@' or end-of-file) and stores it (along with a null
+terminator) at the specified destination.  In this code, you can see
+that the destination is an array {\tt buf}, declared as having
+\verb@BUFFER_SIZE@ bytes.  At the time your targets were
+generated, \verb@BUFFER_SIZE@ was a compile-time constant
+specific to your version of the programs.
+
+Functions {\tt Gets()} and {\tt gets()} have no way to determine
+whether their destination buffers
+are large enough to store the string they read.  They simply copy
+sequences of bytes,
+possibly overrunning the bounds of the storage
+allocated at the destinations.
+
+If the string typed by the user and read by {\tt getbuf} is
+sufficiently short, 
+it is clear that {\tt getbuf} will return 1, as shown
+by the following execution examples:
+
+\begin{tty}
+    unix>{\em ./ctarget}
+    Cookie: 0x1a7dd803
+    Type string:{\em Keep it short!}
+    No exploit.  Getbuf returned 0x1
+    Normal return
+\end{tty}
+
+Typically an error occurs if you type a long string:
+
+\begin{tty}
+    unix>{\em ./ctarget}
+    Cookie: 0x1a7dd803
+    Type string:{\em This is not a very interesting string, but it has the property ...}
+    Ouch!: You caused a segmentation fault!
+    Better luck next time
+\end{tty}
+
+(Note that
+the value of the cookie shown will differ from yours.)
+Program \textsc{rtarget} will have the same behavior.  
+As the error message indicates, overrunning the buffer typically
+causes the program state to be corrupted, leading to a memory access
+error.  Your task is to be more clever with the strings you feed {\sc
+ctarget} and {\sc rtarget} so that they do more interesting things.  These are called
+{\em exploit} strings.
+
+Both {\sc ctarget} and {\sc rtarget} take several different command line arguments:
+\begin{description}
+\item[{\tt -h}:] Print list of possible command line arguments
+\item[{\tt -q}:] Don't send results to the grading server
+\item[{\tt -i FILE}:] Supply input from a file, rather than from
+  standard input
+\end{description}
+
+Your exploit strings will typically contain byte values that do not
+correspond to the ASCII values for printing characters.  The program
+{\sc hex2raw} will enable you to generate these {\em raw} strings.  See
+Appendix \ref{app:hex2raw} for more information on how to use {\sc hex2raw}.
+
+\textbf{Important points:}
+
+\begin{itemize}
+
+\item Your exploit string must not contain byte value {\tt 0x0a} at
+any intermediate position, since this is the ASCII code for newline
+(`\verb@\n@').  When {\tt Gets} encounters this byte, it will assume
+you intended to terminate the string.
+
+\item {\sc hex2raw} expects two-digit hex values separated by one or
+  more white spaces.
+So if you want to create a byte with a hex value of 0, 
+you need to write it as {\tt 00}.  To create the word {\tt 0xdeadbeef} you 
+should pass ``\texttt{ef be ad de}'' to  {\sc hex2raw} (note the reversal
+required for little-endian byte ordering).
+
+\end{itemize}
+
+When you have correctly solved one of the levels, your target program
+will automatically send a notification to the grading server.  For example:
+\begin{tty}
+    unix>{\em ./hex2raw < ctarget.l2.txt | ./ctarget}
+    Cookie: 0x1a7dd803
+    Type string:Touch2!: You called touch2(0x1a7dd803)
+    Valid solution for level 2 with target ctarget
+    PASSED: Sent exploit string to server to be validated.
+    NICE JOB!
+\end{tty}
+
+The server will test your exploit string to make sure it really works,
+and it will update the Attacklab scoreboard page indicating that your
+userid (listed by your target number for anonymity) has completed this phase.
+
+You can view the scoreboard by pointing your Web browser at 
+\begin{verbatim}
+    http://$Attacklab::SERVER_NAME:15513/scoreboard
+\end{verbatim}
+
+Unlike the Bomb Lab, there is no penalty for making mistakes in this
+lab.  Feel free to fire away at {\sc ctarget} and {\sc rtarget} with
+any strings you like.
+
+IMPORTANT NOTE: You can work on your solution on any Linux machine, but 
+in order to submit your solution, you will need to be running on one of the 
+following machines:
+\begin{verbatim}
+INSTRUCTOR: Insert the list of the legal domain names that you
+ established in buflab/src/config.c.
+\end{verbatim}
+
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Phase & Program & Level & Method & Function & Points \\
+\hline
+1 & {\sc ctarget} & 1 & CI & \texttt{touch1} & 10 \\
+2 & {\sc ctarget} & 2 & CI & \texttt{touch2} & 25 \\
+3 & {\sc ctarget} & 3 & CI & \texttt{touch3} & 25 \\
+\hline
+4 & {\sc rtarget} & 2 & ROP & \texttt{touch2} & 35 \\
+5 & {\sc rtarget} & 3 & ROP & \texttt{touch3} & 5 \\
+\hline
+\multicolumn{1}{l}{CI:} & \multicolumn{4}{l}{Code injection} \\
+\multicolumn{1}{l}{ROP:} & \multicolumn{4}{l}{Return-oriented programming} \\
+\end{tabular}
+\end{center}
+\caption{Summary of attack lab phases}
+\label{fig:phases}
+\end{figure}
+Figure \ref{fig:phases} summarizes the five phases of the lab.  As can
+be seen, the first three involve code-injection (CI) attacks on {\sc
+  ctarget}, while the last two involve return-oriented-programming
+(ROP) attacks on {\sc rtarget}.
+
+\section{Part I: Code Injection Attacks}
+
+For the first three phases, your exploit strings will attack {\sc
+  ctarget}.  This program is set up in a way that the stack positions
+will be consistent from one run to the next and so that data on the
+stack can be treated as executable code.  These features make the program
+vulnerable to attacks where the exploit strings contain the byte
+encodings of executable code.
+
+\subsection{Level 1}
+
+For Phase 1, you will not inject new code.
+Instead, your exploit string will redirect the program to execute 
+an existing procedure.
+
+Function {\tt getbuf} is called within {\sc ctarget} by a function
+{\tt test} having the following C code:
+
+\begin{ccode}
+\input test-c
+\end{ccode}
+
+When {\tt getbuf} executes its return statement (line 5 of {\tt
+getbuf}), the program ordinarily resumes execution within function
+{\tt test} (at line 5 of this function).
+We want to change this behavior.
+Within the file {\tt ctarget}, there is code for a function {\tt touch1} having
+the following C representation:
+
+\begin{ccode}
+\input touch1-c
+\end{ccode}
+
+Your task is to get {\sc ctarget} to execute the code for {\tt touch1}
+when {\tt getbuf} executes its return statement, rather than returning
+to {\tt test}.  Note that your exploit string may also corrupt parts
+of the stack not directly related to this stage, but this will not
+cause a problem, since {\tt touch1} causes the program to exit
+directly.
+
+{\bf Some Advice}:
+\begin{itemize}
+
+\item All the information you need to devise your exploit string for
+this level can be determined by examining a disassembled version of
+{\sc ctarget}. Use {\tt objdump -d} to get this dissembled version.
+
+\item
+The idea is to position a byte representation of the starting address
+for {\tt touch1} so that the {\tt ret} instruction at the end of the
+code for {\tt getbuf} will transfer control to {\tt touch1}.
+
+\item
+Be careful about byte ordering.  
+
+\item
+You might want to use {\sc gdb} to step the program through the last
+few instructions of {\tt getbuf} to make sure it is doing the right
+thing.
+
+\item
+The placement of {\tt buf} within the stack frame for {\tt getbuf}
+depends on the value of compile-time constant \verb@BUFFER_SIZE@, as
+well the allocation strategy used by {\sc gcc}.
+You will need to examine the disassembled code to determine its position.
+\end{itemize}
+
+
+\subsection{Level 2}
+
+Phase 2 involves injecting a small amount of code as part of your exploit string.
+
+Within the file {\tt ctarget} there is code for a function {\tt touch2}
+having the following C representation:
+
+\begin{ccode}
+\input touch2-c
+\end{ccode}
+
+Your task is to get {\sc ctarget} to execute the
+code for {\tt touch2} rather than returning to {\tt test}.  In this
+case, however, you must make it appear to {\tt touch2} as if you have
+passed your cookie as its argument.
+
+{\bf Some Advice}:
+\begin{itemize}
+
+\item You will want to position a byte representation of the address
+  of your injected code in such a way that {\tt ret} instruction at
+  the end of the code for \texttt{getbuf} will transfer control to it.
+
+\item Recall that the first argument to a function is passed in
+  register \rdireg{}.
+
+\item Your injected code should set the register to your cookie, and
+  then use a \texttt{ret} instruction to transfer control to the first
+  instruction in \texttt{touch2}.
+
+\item Do not attempt to use {\tt jmp} or {\tt call} instructions in
+  your exploit code.  The encodings of destination addresses for these
+  instructions are difficult to formulate.  Use {\tt ret} instructions for
+  all transfers of control, even when you are not returning from a
+  call.
+
+\item See the discussion in Appendix \ref{app:bytecode}
+on how to use tools to generate the byte-level representations of instruction sequences.
+\end{itemize}
+
+\subsection{Level 3}
+
+Phase 3 also involves a code injection attack, but passing a string as argument.
+
+Within the file {\tt ctarget} there is code for functions {\tt
+  hexmatch} and {\tt touch3}
+having the following C representations:
+
+\begin{ccode}
+\input touch3-c
+\end{ccode}
+
+Your task is to get {\sc ctarget} to execute the
+code for {\tt touch3} rather than returning to {\tt test}.
+You must make it appear to {\tt touch3} as if you have
+passed a string representation of your cookie as its argument.
+
+{\bf Some Advice}:
+\begin{itemize}
+
+\item You will need to include a string representation of your cookie
+  in your exploit string.  The string should consist of the eight hexadecimal
+  digits (ordered from most to least significant) without a leading ``\texttt{0x}.''
+
+\item Recall that a string is represented in C as a sequence of bytes
+  followed by a byte with value 0.  Type ``\texttt{man ascii}'' on any Linux
+  machine to see the byte representations of the characters you need.
+
+\item Your injected code should set register
+\rdireg{}
+to the address of this string.
+
+\item When functions {\tt hexmatch} and {\tt strncmp} are called, they
+  push data onto the stack, overwriting portions of memory that held
+  the buffer used by {\tt getbuf}.  As a result, you will need to be careful where
+  you place the string representation of your cookie.
+\end{itemize}
+
+
+
+\section{Part II: Return-Oriented Programming}
+
+Performing code-injection attacks on program {\sc rtarget} is much
+more difficult than it is for {\sc ctarget}, because it uses
+two techniques to thwart such attacks:
+\begin{itemize}
+\item It uses randomization so that the stack positions differ from
+  one run to another.  This makes it impossible to determine where your
+  injected code will be located.
+\item It marks the section of memory holding the stack as
+  nonexecutable, so even if you could set the program counter to the
+  start of your injected code, the program would fail with a
+  segmentation fault.
+\end{itemize}
+
+\begin{figure}
+\centerline{\includegraphics*[scale=0.8]{rop}}
+\caption{Setting up sequence of gadgets for execution.  Byte
+value \texttt{0xc3} encodes the \texttt{ret} instruction.}
+ \label{fig:rop}
+\end{figure}
+
+Fortunately, clever people have devised strategies for getting useful
+things done in a program by executing existing code, rather than
+injecting new code.  The most general form of this is referred to as
+{\em return-oriented programming} (ROP)
+\cite{roemer-2012,schwartz-2011}.  The strategy with ROP is to
+identify byte sequences within an existing program that consist of one
+or more instructions followed by the instruction \texttt{ret}.  Such
+a segment is referred to as a {\em gadget}.  Figure \ref{fig:rop}
+illustrates how the stack can be set up to execute a sequence of $n$
+gadgets.  In this figure, the stack contains a sequence of gadget
+addresses.  Each gadget consists of a series of instruction
+bytes, with the final one being \texttt{0xc3}, encoding the
+\texttt{ret} instruction.
+When the program executes a {\tt ret} instruction starting with this
+configuration, it will initiate a chain of gadget executions,
+with the {\tt ret} instruction at the end of each gadget causing the
+program to jump to the beginning of the next.
+
+A gadget can make use of code corresponding to assembly-language
+statements generated by the compiler, especially ones at the ends of 
+functions.  In practice, there may be some useful gadgets of this form,
+but not enough to implement many important operations.  For example,
+it is highly unlikely that a compiled function would have {\tt popq
+  \rdireg} as its last instruction before {\tt ret}.  Fortunately,
+with a byte-oriented instruction set, such as x86-64, a gadget can
+often be found by extracting patterns from other parts of the
+instruction byte sequence.
+
+For example, one version of {\tt rtarget} contains code generated for the 
+following C function:
+
+\begin{ccode}
+\input{farm-eg-c}
+\end{ccode}
+
+The chances of this function being useful for attacking a system seem
+pretty slim.  But, the disassembled 
+machine code for this function shows an interesting byte sequence:
+
+\begin{ccode}
+\input{farm-eg-d}
+\end{ccode}
+
+The byte sequence {\tt 48 89 c7} encodes the instruction
+{\tt movq \raxreg, \rdireg}.
+(See Figure \ref{fig:encode}A for the encodings of useful {\tt movq} instructions.)
+This sequence is followed by byte value {\tt c3}, which encodes the
+{\tt ret} instruction.
+The function starts at address {\tt 0x400f15}, and the sequence starts
+on the fourth byte of the function.  Thus, this code contains a
+gadget, 
+having a starting address of {\tt 0x400f18},
+that will copy the 64-bit value in register \raxreg{} to register \rdireg{}.
+
+Your code for {\sc rtarget} contains a number of functions similar to
+the \verb@setval_210@ function shown above in a region we refer to as
+the {\em gadget farm}.  Your job will be to identify useful gadgets in
+the gadget farm and use these to perform attacks similar to those you
+did in Phases 2 and 3.
+
+{\bf Important:} The gadget farm is demarcated by functions
+\verb@start_farm@ and \verb@end_farm@ in your copy of {\tt rtarget}.
+Do not attempt to construct gadgets from other portions of the program code.
+
+\begin{figure}
+A. Encodings of {\tt movq} instructions
+\begin{center}
+\small
+\input{itables/movq}
+\end{center}
+B. Encodings of {\tt popq} instructions
+\begin{center}
+\small
+\input{itables/popq}
+\end{center}
+C. Encodings of {\tt movl} instructions
+\begin{center}
+\small
+\input{itables/movl}
+\end{center}
+D. Encodings of 2-byte functional nop instructions
+\begin{center}
+\small
+\input{itables/nopb}
+\end{center}
+\caption{Byte encodings of instructions.  All values are shown in hexadecimal.}
+\label{fig:encode}
+\end{figure}
+
+\subsection{Level 2}
+
+For Phase 4, you will repeat the attack of Phase 2, but do so on
+program {\sc rtarget} using gadgets from your gadget farm.  You can
+construct your solution using gadgets consisting of the following
+instruction types, and using only the first eight x86-64 registers
+(\raxreg{}--\rdireg{}).
+\begin{description}
+\item[{\tt movq}]: The codes for these are shown in Figure
+  \ref{fig:encode}A. 
+\item[{\tt popq}]: The codes for these are shown in Figure
+  \ref{fig:encode}B. 
+\item[{\tt ret}]: This instruction is encoded by the single byte {\tt 0xc3}.
+\item[{\tt nop}]: This instruction (pronounced ``no op,'' which is
+  short for ``no operation'')  is encoded by the single byte {\tt
+  0x90}.  Its only effect is to cause the program counter to be
+  incremented by 1.
+\end{description}
+
+{\bf Some Advice}:
+\begin{itemize}
+\item All the gadgets you need can be found in the region of the
+  code for {\tt rtarget} demarcated by the functions \verb@start_farm@ and
+  \verb@mid_farm@.
+\item You can do this attack with just two gadgets.
+\item When a gadget uses a {\tt popq} instruction, it will pop data
+  from the stack.  As a result, your exploit string will contain a
+  combination of gadget addresses and data.
+\end{itemize}
+
+\subsection{Level 3}
+
+Before you take on the Phase 5, pause to consider what you have
+accomplished so far.
+In Phases 2 and 3,
+you caused a program to execute machine code of your
+own design.  If {\sc ctarget} had been a network server, you could
+have injected your own code into a distant machine.  In Phase 4, you
+circumvented two of the main devices modern systems use to thwart
+buffer overflow attacks.  Although you did not inject your own code,
+you were able inject a type of program that operates by stitching
+together sequences of existing code.
+You have also gotten 95/100 points for the lab.  That's a good score.
+If you have other pressing obligations consider stopping right now.
+
+Phase 5 requires you to do an ROP attack on {\sc rtarget} to invoke
+function {\tt touch3} with a pointer to a string representation of
+your cookie.  That may not seem significantly more difficult than using an
+ROP attack to invoke {\tt touch2}, except that we have made it so.
+Moreover, Phase 5 counts for only 5 points, which is not a true
+measure of the effort it will require.  Think of it as more an extra
+credit problem for those who want to go beyond the normal expectations
+for the course. 
+
+To solve Phase 5, you can use gadgets in the region of the code in {\tt rtarget}
+demarcated by functions \verb@start_farm@ and
+\verb@end_farm@.  In addition to the gadgets used in Phase 4,
+this expanded farm includes the encodings of different {\tt movl} instructions, as
+shown in Figure \ref{fig:encode}C.  The byte sequences in
+this part of the farm also contain 
+2-byte instructions that serve as {\em
+  functional nops}, i.e., they do not change any register or memory values.
+These include instructions, shown in Figure \ref{fig:encode}D, such as 
+\verb@andb %al,%al@,
+%
+that operate on the low-order bytes of some of the registers but do
+not change their values.
+
+{\bf Some Advice:}
+\begin{itemize}
+\item You'll want to review the effect a {\tt movl} instruction has on
+  the upper 4 bytes of a register, as is described on page 183 of the text.
+\item The official solution requires eight gadgets (not all of which
+  are unique).  
+\end{itemize}
+
+
+Good luck and have fun!
+
+\appendix
+
+\section{Using {\sc Hex2raw}}
+\label{app:hex2raw}
+
+{\sc Hex2raw} takes
+as input a {\em hex-formatted} string.  In this format, each byte
+value is represented by two hex digits.  For example, the string
+``{\tt 012345}'' could be entered in hex format as ``{\tt 30 31 32 33
+34 35 00}.'' (Recall that the ASCII code for decimal digit $x$ is {\tt
+0x3}$x$, and that the end of a string is indicated by a null byte.)
+
+The hex characters you pass to {\sc hex2raw} should be separated by
+whitespace (blanks or newlines). We recommend separating different
+parts of your exploit string with newlines while you're working on
+it. {\sc hex2raw} supports C-style block comments, so you can
+mark off sections of your exploit string. For example:
+
+\begin{tty}
+48 c7 c1 f0 11 40 00 /* mov    $0x40011f0,%rcx */
+\end{tty}
+%% $ (De-confuse text editor's autoformatting)
+
+Be sure to leave space around both the starting and ending comment strings (``\verb@/*@'', ``\verb@*/@''),
+so that the comments will be properly ignored.
+
+If you generate a hex-formatted exploit string in the file {\tt
+exploit.txt}, you can apply the raw string to {\sc ctarget} or {\sc
+  rtarget} in several
+different ways:
+\begin{enumerate}
+\item You can set up a series of pipes to pass the string through {\sc hex2raw}.
+\begin{tty}
+    unix>{\em cat exploit.txt | ./hex2raw | ./ctarget}
+\end{tty}
+\item
+You can store the raw string in a file and use I/O redirection:
+\begin{tty}
+    unix>{\em ./hex2raw < exploit.txt > exploit-raw.txt}
+    unix>{\em ./ctarget < exploit-raw.txt}
+\end{tty}
+This approach can also be used when running from within
+{\sc gdb}:
+\begin{tty}
+    unix>{\em gdb ctarget}
+    (gdb){\em run < exploit-raw.txt}
+\end{tty}
+\item
+You can store the raw string in a file and provide the file name as a
+command-line argument:
+\begin{tty}
+    unix>{\em ./hex2raw < exploit.txt > exploit-raw.txt}
+    unix>{\em ./ctarget -i exploit-raw.txt}
+\end{tty}
+This approach also can be used when running from within {\sc gdb}.
+\end{enumerate}
+
+
+\section{Generating Byte Codes}
+\label{app:bytecode}
+
+Using {\sc gcc} as an assembler and {\sc objdump} as a disassembler
+makes it convenient to generate the byte codes for instruction
+sequences.  For example, suppose you write a file \verb@example.s@
+containing the following assembly code:
+\begin{ccode}
+\begin{tty}
+\input{example.s}
+\end{tty}
+\end{ccode}
+
+The code can contain a mixture of instructions and data.  Anything to
+the right of a `\verb@#@' character is a comment.  
+
+You can now assemble and disassemble this file:
+\begin{tty}
+    unix>{\em gcc -c example.s}
+    unix>{\em objdump -d example.o > example.d}
+\end{tty}
+The generated file {\tt example.d} contains the following:
+\begin{ccode}
+\begin{tty}
+\input{example.d}
+\end{tty}
+\end{ccode}
+The lines at the bottom show the machine code generated from the
+assembly language instructions.  Each line has a hexadecimal number
+on the left
+indicating the instruction's starting address (starting with 0), while the hex digits
+after the `\verb@:@' character indicate the byte codes for the
+instruction.  Thus, we can see that the instruction {\tt push
+\$0xABCDEF} has hex-formatted byte code {\tt 68 ef cd ab 00}.
+
+From this file, you can get the byte sequence for the code:
+\begin{ccode}
+\begin{tty}
+\input{example.txt}
+\end{tty}
+\end{ccode}
+This string can then be passed through {\sc hex2raw} to generate an
+input string for the target programs..  Alternatively, you can edit
+example.d to omit extraneous values and to contain C-style comments for
+readability, yielding:
+\begin{ccode}
+\begin{alltt}
+\input{example.ed}
+\end{alltt}
+\end{ccode}
+This is also a valid input you can pass through {\sc hex2raw} before
+sending to one of the target programs.
+
+\bibliography{refs}
+
+\end{document}

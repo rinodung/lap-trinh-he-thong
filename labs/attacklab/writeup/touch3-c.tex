@@ -1,0 +1,24 @@
+\begin{alltt}
+{\scriptsize   1} /* Compare string to hex represention of unsigned value */
+{\scriptsize   2} int hexmatch(unsigned val, char *sval)
+{\scriptsize   3} \verb:{:
+{\scriptsize   4}     char cbuf[110];
+{\scriptsize   5}     /* Make position of check string unpredictable */
+{\scriptsize   6}     char *s = cbuf + random() % 100;
+{\scriptsize   7}     sprintf(s, "%.8x", val);
+{\scriptsize   8}     return strncmp(sval, s, 9) == 0;
+{\scriptsize   9} \verb:}:
+{\scriptsize  10} 
+{\scriptsize  11} void touch3(char *sval)
+{\scriptsize  12} \verb:{:
+{\scriptsize  13}     vlevel = 3;       /* Part of validation protocol */
+{\scriptsize  14}     if (hexmatch(cookie, sval)) \verb:{:
+{\scriptsize  15}         printf("Touch3!: You called touch3(\verb:\":%s\verb:\":)\verb:\n:", sval);
+{\scriptsize  16}         validate(3);
+{\scriptsize  17}     \verb:}: else \verb:{:
+{\scriptsize  18}         printf("Misfire: You called touch3(\verb:\":%s\verb:\":)\verb:\n:", sval);
+{\scriptsize  19}         fail(3);
+{\scriptsize  20}     \verb:}:
+{\scriptsize  21}     exit(0);
+{\scriptsize  22} \verb:}:
+\end{alltt}

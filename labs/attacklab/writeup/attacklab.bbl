@@ -1,0 +1,14 @@
+\begin{thebibliography}{1}
+
+\bibitem{roemer-2012}
+R.~Roemer, E.~Buchanan, H.~Shacham, and S.~Savage.
+\newblock Return-oriented programming: Systems, languages, and applications.
+\newblock {\em ACM Transactions on Information System Security},
+  15(1):2:1--2:34, March 2012.
+
+\bibitem{schwartz-2011}
+E.~J. Schwartz, T.~Avgerinos, and D.~Brumley.
+\newblock Q: Exploit hardening made easy.
+\newblock In {\em {USENIX} Security Symposium}, 2011.
+
+\end{thebibliography}

@@ -1,0 +1,43 @@
+\begin{alltt}
+{\scriptsize   1} /* linked list element */
+{\scriptsize   2} typedef struct ELE \verb:{:
+{\scriptsize   3}     long val;
+{\scriptsize   4}     struct ELE *next;
+{\scriptsize   5} \verb:}: *list_ptr;
+{\scriptsize   6} 
+{\scriptsize   7} /* sum_list - Sum the elements of a linked list */
+{\scriptsize   8} long sum_list(list_ptr ls)
+{\scriptsize   9} \verb:{:
+{\scriptsize  10}     long val = 0;
+{\scriptsize  11}     while (ls) \verb:{:
+{\scriptsize  12}         val += ls->val;
+{\scriptsize  13}         ls = ls->next;
+{\scriptsize  14}     \verb:}:
+{\scriptsize  15}     return val;
+{\scriptsize  16} \verb:}:
+{\scriptsize  17} 
+{\scriptsize  18} /* rsum_list - Recursive version of sum_list */
+{\scriptsize  19} long rsum_list(list_ptr ls)
+{\scriptsize  20} \verb:{:
+{\scriptsize  21}     if (!ls)
+{\scriptsize  22}         return 0;
+{\scriptsize  23}     else \verb:{:
+{\scriptsize  24}         long val = ls->val;
+{\scriptsize  25}         long rest = rsum_list(ls->next);
+{\scriptsize  26}         return val + rest;
+{\scriptsize  27}     \verb:}:
+{\scriptsize  28} \verb:}:
+{\scriptsize  29} 
+{\scriptsize  30} /* copy_block - Copy src to dest and return xor checksum of src */
+{\scriptsize  31} long copy_block(long *src, long *dest, long len)
+{\scriptsize  32} \verb:{:
+{\scriptsize  33}     long result = 0;
+{\scriptsize  34}     while (len > 0) \verb:{:
+{\scriptsize  35}         long val = *src++;
+{\scriptsize  36}         *dest++ = val;
+{\scriptsize  37}         result ^= val;
+{\scriptsize  38}         len--;
+{\scriptsize  39}     \verb:}:
+{\scriptsize  40}     return result;
+{\scriptsize  41} \verb:}:
+\end{alltt}

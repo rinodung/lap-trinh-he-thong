@@ -1,0 +1,20 @@
+\begin{alltt}
+{\scriptsize   1} /*
+{\scriptsize   2}  * ncopy - copy src to dst, returning number of positive ints
+{\scriptsize   3}  * contained in src array.
+{\scriptsize   4}  */
+{\scriptsize   5} word_t ncopy(word_t *src, word_t *dst, word_t len)
+{\scriptsize   6} \verb:{:
+{\scriptsize   7}     word_t count = 0;
+{\scriptsize   8}     word_t val;
+{\scriptsize   9} 
+{\scriptsize  10}     while (len > 0) \verb:{:
+{\scriptsize  11}         val = *src++;
+{\scriptsize  12}         *dst++ = val;
+{\scriptsize  13}         if (val > 0)
+{\scriptsize  14}             count++;
+{\scriptsize  15}         len--;
+{\scriptsize  16}     \verb:}:
+{\scriptsize  17}     return count;
+{\scriptsize  18} \verb:}:
+\end{alltt}
